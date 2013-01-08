@@ -2,6 +2,33 @@ package djs
 
 import "testing"
 
+func TestBasic(t *testing.T) {
+	ds := New()
+	CheckedFind := func (i,j int, expected bool, format string) {
+		if (ds.Find(i) == ds.Find(j)) != expected {
+			t.Errorf(format, i, j)
+		}
+	}
+
+	ds.MakeSet(1)
+	ds.MakeSet(2)
+	ds.MakeSet(3)
+
+	CheckedFind(1, 2, false, "%v and %v in same set")
+	CheckedFind(1, 3, false, "%v and %v in same set")
+	CheckedFind(2, 3, false, "%v and %v in same set")
+
+	ds.Union(1,2)
+	CheckedFind(1, 2, true, "%v and %v not in same set")
+	CheckedFind(1, 3, false, "%v and %v in same set")
+	CheckedFind(2, 3, false, "%v and %v in same set")
+
+	ds.Union(2,3)
+	CheckedFind(1, 2, true, "%v and %v not in same set")
+	CheckedFind(1, 3, true, "%v and %v not in same set")
+	CheckedFind(2, 3, true, "%v and %v not in same set")
+}
+
 func TestDisjointSet(t *testing.T) {
 	vec := []int {
 		1, 2, 4, 8, 16, 32, 64, 128, 256,512,

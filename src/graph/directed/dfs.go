@@ -1,14 +1,23 @@
+// Implementation of depth-first search and algorithms based on
+// depth-first walks.
 package directed
 
-import "fmt"
-import "container/list"
+import (
+	"fmt"
+	"container/list"
+)
 
 // Structure holding information about the walk of an individual
-// vertex.
+// vertex. The 'discover' field is set to the time when the vertex was
+// discovered (first seen in the depth-first walk), and the 'finish'
+// field is set to the time when the processing of the subtree rooted
+// at the vertex was finished.
 type WalkInfo struct {
 	discover, finish int
 }
 
+// Return a string for the walk information of a vertex. Mainly used
+// for debugging.
 func (info WalkInfo) String() string {
 	return fmt.Sprintf("%d/%d", info.discover, info.finish)
 }
@@ -24,6 +33,8 @@ type Walker struct {
 	onFinish (func (Vertex, int))
 }
 
+// Return a string for the contents of the walker. Mainly used for
+// debugging.
 func (walker *Walker) String() string {
 	result := ""
 	for k, v := range walker.info {
@@ -32,10 +43,10 @@ func (walker *Walker) String() string {
 	return result
 }
 
-// Perform a depth-first visit starting with a single vertex and store
-// the information in the walker structure.  This will be a
+// Perform a depth-first walk starting with a single vertex and store
+// the information in the 'walker' structure.  This will be a
 // depth-first search forest, which can be used to deduce other
-// properties.
+// properties of the graph.
 func (walker *Walker) DepthFirstVisit(vertex Vertex) {
 	if walker.info[vertex] == nil {
 		walker.time++
