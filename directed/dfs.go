@@ -58,8 +58,9 @@ func (walker *walker) depthFirstVisit(vertex Vertex) {
 		if (walker.onDiscover != nil) {
 			walker.onDiscover(vertex)
 		}
-		walker.graph.DoOutEdges(vertex, func (source, target Vertex) {
+		walker.graph.DoOutEdges(vertex, func (source, target Vertex) error {
 			walker.depthFirstVisit(target)
+			return nil
 		})
 		walker.time++
 		walker.info[vertex].finish = walker.time
@@ -90,13 +91,17 @@ func (graph *Graph) DoDepthFirst(onDiscover, onFinish VertexWalkFunc) {
 
 // DoTopological will process the graph in topological order and call
 // onDiscover with each step.
-func (graph *Graph) DoTopological(onDiscover VertexWalkFunc) {
+func (graph *Graph) DoTopological(onDiscover VertexWalkFunc) error {
 	lst := list.New()
-	graph.DoDepthFirst(nil, func (vertex Vertex) {
+	graph.DoDepthFirst(nil, func (vertex Vertex) error {
 		lst.PushFront(vertex)
+		return nil
 	})
 	// Process elements in reverse order of finishing time
 	for elem := lst.Front() ; elem != nil ; elem = elem.Next() {
-		onDiscover(elem.Value)
+		if err := onDiscover(elem.Value) ; err != nil {
+			return err
+		}
 	}
+	return nil
 }

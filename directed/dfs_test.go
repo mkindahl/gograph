@@ -56,26 +56,29 @@ func TestDepthFirstWalk(t *testing.T) {
 
 	info := make(map[int]*Info)
 	time := 1
-	onDiscover := func (vertex Vertex) {
+	onDiscover := func (vertex Vertex) error {
 		if info[vertex.(int)] == nil {
 			info[vertex.(int)] = new(Info)
 		}
 		info[vertex.(int)].discover = time
 		time++
+		return nil
 	}
-	onFinish := func (vertex Vertex) {
+	onFinish := func (vertex Vertex) error {
 		if info[vertex.(int)] == nil {
 			info[vertex.(int)] = new(Info)
 		}
 		info[vertex.(int)].finish = time
 		time++
+		return nil
 	}
 	graph.DoDepthFirst(onDiscover, onFinish)
-	graph.DoEdges(func (source, target Vertex) {
+	graph.DoEdges(func (source, target Vertex) error {
 		if source != target && !IsValidNesting(info[source.(int)], info[target.(int)]) {
 			pretty := PrettyMap(info)
 			t.Errorf("Edge %v -> %v has bad finish time (%s)\n", source, target, pretty)
 		}
+		return nil
 	})
 			
 }
@@ -86,11 +89,12 @@ func TestTopologicalWalk(t *testing.T) {
 	graph.AddEdge(2,3)
 	graph.AddEdge(3,4)
 	time := 1
-	graph.DoTopological(func (vertex Vertex) {
+	graph.DoTopological(func (vertex Vertex) error {
 		if vertex.(int) != time {
 			t.Errorf("Vertex %d processed at time %d\n", vertex.(int), time)
 		}
 		time++
+		return nil
 	})
 
 	graph = New()
@@ -100,9 +104,10 @@ func TestTopologicalWalk(t *testing.T) {
 	graph.AddEdge(3,4)
 	when := new([5]int)
 	time = 1
-	graph.DoTopological(func (vertex Vertex) {
+	graph.DoTopological(func (vertex Vertex) error {
 		when[time] = vertex.(int)
 		time++
+		return nil
 	})
 	if !(when[1] < when[2] && when[1] < when[3] && when[2] < when[4] && when[3] < when[4]) {
 		t.Errorf("Not in topological order %v\n", when)

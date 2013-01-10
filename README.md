@@ -6,6 +6,10 @@ Library for working with graphs using the Go language.
 The library is distributed under the BSD License. See license text
 below.
 
+You can use the "go get" command to download and install the packages:
+
+   go get github.com/mkindahl/gograph/directed
+   go get github.com/mkindahl/gograph/djs
 
 Description
 ===========

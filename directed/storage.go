@@ -17,10 +17,10 @@ type Graph struct {
 
 // VertexWalkFunc is a function called when walking vertices of a
 // graph.
-type VertexWalkFunc func (vertex Vertex)
+type VertexWalkFunc func (vertex Vertex) error
 
 // EdgeWalkFunc is a function called when walking edges of a graph.
-type EdgeWalkFunc func (source, target Vertex)
+type EdgeWalkFunc func (source, target Vertex) error
 
 // find is used to locate an element in a list by value. It will
 // return true and a pointer to the element if the element was found
@@ -75,35 +75,48 @@ func (graph *Graph) AddVertex(vertex Vertex) bool {
 }
 
 // DoVertices iterate over all the vertices of the graph calling
-// 'walkFn' with each vertex.
-func (graph *Graph) DoVertices(walkFn VertexWalkFunc) {
+// 'walkFn' with each vertex. If the walk function returns an error,
+// iteration will be aborted and the error returned to the caller.
+func (graph *Graph) DoVertices(walkFn VertexWalkFunc) error {
 	for vertex := range graph.edges {
-		walkFn(vertex)
+		if err := walkFn(vertex) ; err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // DoEdges will iterate over all the edges of the graph calling
-// 'walkFn' with the source and target vertex of the edge.
-func (graph *Graph) DoEdges(walkFn EdgeWalkFunc) {
+// 'walkFn' with the source and target vertex of the edge. If the walk
+// function return an error, iteration will be aborted and the error
+// returned.
+func (graph *Graph) DoEdges(walkFn EdgeWalkFunc) error {
 	for vertex, edges := range graph.edges {
 		for elem := edges.Front() ; elem != nil ; elem = elem.Next() {
-			walkFn(vertex, elem.Value)
+			if err := walkFn(vertex, elem.Value) ; err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
 // DoOutEdges iterate over the out-edges of a vertex, calling 'walkFn'
 // with the source and the target vertex of the edge.  The source
 // target will be 'vertex' in each case, but edge walk functions use
-// this common format.
-func (graph *Graph) DoOutEdges(vertex Vertex, walkFn EdgeWalkFunc) {
+// this common format. If the walk function return an error, iteration
+// will be aborted and the error returned.
+func (graph *Graph) DoOutEdges(vertex Vertex, walkFn EdgeWalkFunc) error {
 	lst := graph.edges[vertex]
 	if lst == nil {
-		return
+		return nil
 	}
 	for elem := lst.Front() ; elem != nil ; elem = elem.Next() {
-		walkFn(vertex, elem.Value)
+		if err := walkFn(vertex, elem.Value) ; err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // HasVertex check if a vertex exists in the graph. Will return 'true'
