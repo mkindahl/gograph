@@ -90,7 +90,7 @@ func TestAddEdge(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		for j := 10; j < 20; j++ {
 			CheckedAddEdge(i, j, true, "Edge (%v,%v) cannot be added")
-			CheckedAddEdge(i, j, false, "Duplicate edge (%v,%v) should not be possible to add")
+			CheckedAddEdge(i, j, false, "Duplicate edge (%v,%v) can be added")
 		}
 	}
 
@@ -121,4 +121,65 @@ func TestAddEdge(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestRemoveEdge(t *testing.T) {
+	graph := New()
+
+	CheckedHasEdge := func(x, y Vertex, expected bool, format string) {
+		if graph.HasEdge(x, y) != expected {
+			t.Errorf(format, x, y)
+		}
+	}
+
+	CheckedRemoveEdge := func(source, target Vertex) {
+		graph.RemoveEdge(source, target)
+		CheckedHasEdge(source, target, false, "Edge (%d,%d) should not be there")
+	}
+
+	graph.AddEdge(1, 2)
+	graph.AddEdge(1, 3)
+	graph.AddEdge(3, 4)
+	graph.AddEdge(2, 4)
+	graph.AddEdge(4, 1)
+
+	CheckedRemoveEdge(4, 1)
+	CheckedHasEdge(1, 2, true, "Edge (%d, %d) missing")
+	CheckedHasEdge(1, 3, true, "Edge (%d, %d) missing")
+	CheckedHasEdge(3, 4, true, "Edge (%d, %d) missing")
+	CheckedHasEdge(2, 4, true, "Edge (%d, %d) missing")
+}
+
+func TestRemoveVertex(t *testing.T) {
+	graph := New()
+
+	CheckedHasVertex := func(vertex Vertex, expected bool, format string) {
+		if graph.HasVertex(vertex) != expected {
+			t.Errorf(format, vertex)
+		}
+	}
+
+	CheckedHasEdge := func(x, y Vertex, expected bool, format string) {
+		if graph.HasEdge(x, y) != expected {
+			t.Errorf(format, x, y)
+		}
+	}
+
+	CheckedRemoveVertex := func(vtx Vertex) {
+		graph.RemoveVertex(vtx)
+		CheckedHasVertex(vtx, false, "Vertex %d should not be there")
+	}
+
+	graph.AddEdge(1, 2)
+	graph.AddEdge(1, 3)
+	graph.AddEdge(3, 4)
+	graph.AddEdge(2, 4)
+	graph.AddEdge(4, 1)
+
+	CheckedRemoveVertex(4)
+	CheckedHasEdge(1, 2, true, "Edge (%d, %d) missing")
+	CheckedHasEdge(1, 3, true, "Edge (%d, %d) missing")
+	CheckedHasEdge(3, 4, false, "Edge (%d, %d) present")
+	CheckedHasEdge(2, 4, false, "Edge (%d, %d) present")
+	CheckedHasEdge(4, 1, false, "Edge (%d, %d) present")
 }

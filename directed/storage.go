@@ -63,12 +63,49 @@ func (graph *Graph) AddEdge(source, target Vertex) bool {
 	return !found
 }
 
-// Add a vertex to the graph. The vertex will have no in- or
-// out-edges.  The function return 'true' if the vertex was
+// RemoveEdge will remove and edge from the graph. The vertices that
+// serve as endpoints for the edge will not be removed.  The method
+// returns 'true' if the edge was successfully removed, 'false'
+// otherwise.
+func (graph *Graph) RemoveEdge(source, target Vertex) bool {
+	lst := graph.edges[source]
+	if found, elem := find(lst, target); found {
+		lst.Remove(elem)
+		return true
+	}
+	return false
+}
+
+// AddVertex will add a vertex to the graph. The vertex will have no
+// in- or out-edges.  The function return 'true' if the vertex was
 // successfully added, and 'false' if the vertex already existed.
 func (graph *Graph) AddVertex(vertex Vertex) bool {
 	if graph.edges[vertex] == nil {
 		graph.edges[vertex] = list.New()
+		return true
+	}
+	return false
+}
+
+// RemoveVertex will remove the vertex from the graph. Any edges
+// connecting to the graph (either in- or out-edges) will also be
+// removed.
+func (graph *Graph) RemoveVertex(vertex Vertex) bool {
+
+	// It is guaranteed that the vertex is present in the map if
+	// it is present in the graph.
+	if graph.edges[vertex] != nil {
+		// Remove the vertex from the map to remove all
+		// out-edges.
+		delete(graph.edges, vertex)
+
+		// Iterate over all the other lists to remove all
+		// in-edges.
+		for _, lst := range graph.edges {
+			if found, elem := find(lst, vertex); found {
+				lst.Remove(elem)
+			}
+		}
 		return true
 	}
 	return false
