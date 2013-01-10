@@ -8,8 +8,8 @@
 package directed
 
 import (
-	"fmt"
 	"container/list"
+	"fmt"
 )
 
 // Structure holding information about the walk of an individual
@@ -27,13 +27,12 @@ func (info walkInfo) String() string {
 	return fmt.Sprintf("%d/%d", info.discover, info.finish)
 }
 
-
 // A walker structure containing information about a depth-first walk
 // of the graph.
 type walker struct {
-	time int
-	graph *Graph
-	info map[Vertex]*walkInfo
+	time                 int
+	graph                *Graph
+	info                 map[Vertex]*walkInfo
 	onDiscover, onFinish VertexWalkFunc
 }
 
@@ -55,16 +54,16 @@ func (walker *walker) depthFirstVisit(vertex Vertex) {
 	if walker.info[vertex] == nil {
 		walker.time++
 		walker.info[vertex] = &walkInfo{discover: walker.time}
-		if (walker.onDiscover != nil) {
+		if walker.onDiscover != nil {
 			walker.onDiscover(vertex)
 		}
-		walker.graph.DoOutEdges(vertex, func (source, target Vertex) error {
+		walker.graph.DoOutEdges(vertex, func(source, target Vertex) error {
 			walker.depthFirstVisit(target)
 			return nil
 		})
 		walker.time++
 		walker.info[vertex].finish = walker.time
-		if (walker.onFinish != nil) {
+		if walker.onFinish != nil {
 			walker.onFinish(vertex)
 		}
 	}
@@ -79,10 +78,10 @@ func (walker *walker) depthFirstVisit(vertex Vertex) {
 // discovered or finished.
 func (graph *Graph) DoDepthFirst(onDiscover, onFinish VertexWalkFunc) {
 	walker := &walker{
-		graph: graph,
+		graph:      graph,
 		onDiscover: onDiscover,
-		onFinish: onFinish,
-		info: make(map[Vertex]*walkInfo),
+		onFinish:   onFinish,
+		info:       make(map[Vertex]*walkInfo),
 	}
 	for vertex := range graph.edges {
 		walker.depthFirstVisit(vertex)
@@ -93,13 +92,13 @@ func (graph *Graph) DoDepthFirst(onDiscover, onFinish VertexWalkFunc) {
 // onDiscover with each step.
 func (graph *Graph) DoTopological(onDiscover VertexWalkFunc) error {
 	lst := list.New()
-	graph.DoDepthFirst(nil, func (vertex Vertex) error {
+	graph.DoDepthFirst(nil, func(vertex Vertex) error {
 		lst.PushFront(vertex)
 		return nil
 	})
 	// Process elements in reverse order of finishing time
-	for elem := lst.Front() ; elem != nil ; elem = elem.Next() {
-		if err := onDiscover(elem.Value) ; err != nil {
+	for elem := lst.Front(); elem != nil; elem = elem.Next() {
+		if err := onDiscover(elem.Value); err != nil {
 			return err
 		}
 	}

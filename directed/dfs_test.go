@@ -6,8 +6,8 @@
 package directed
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 // Structure holding discovery-finish information for this test.
@@ -32,7 +32,6 @@ func IsValidNesting(x, y *Info) bool {
 	return x.IsDisjoint(y) || x.IsNestedIn(y) || y.IsNestedIn(x)
 }
 
-
 func PrettyMap(input map[int]*Info) string {
 	result := "{ "
 	for k, v := range input {
@@ -45,18 +44,18 @@ func PrettyMap(input map[int]*Info) string {
 // Cormen et.al.
 func TestDepthFirstWalk(t *testing.T) {
 	graph := New()
-	graph.AddEdge(1,2)
-	graph.AddEdge(1,4)
-	graph.AddEdge(2,5)
-	graph.AddEdge(3,5)
-	graph.AddEdge(3,6)
-	graph.AddEdge(4,2)
-	graph.AddEdge(5,4)
-	graph.AddEdge(6,6)
+	graph.AddEdge(1, 2)
+	graph.AddEdge(1, 4)
+	graph.AddEdge(2, 5)
+	graph.AddEdge(3, 5)
+	graph.AddEdge(3, 6)
+	graph.AddEdge(4, 2)
+	graph.AddEdge(5, 4)
+	graph.AddEdge(6, 6)
 
 	info := make(map[int]*Info)
 	time := 1
-	onDiscover := func (vertex Vertex) error {
+	onDiscover := func(vertex Vertex) error {
 		if info[vertex.(int)] == nil {
 			info[vertex.(int)] = new(Info)
 		}
@@ -64,7 +63,7 @@ func TestDepthFirstWalk(t *testing.T) {
 		time++
 		return nil
 	}
-	onFinish := func (vertex Vertex) error {
+	onFinish := func(vertex Vertex) error {
 		if info[vertex.(int)] == nil {
 			info[vertex.(int)] = new(Info)
 		}
@@ -73,23 +72,23 @@ func TestDepthFirstWalk(t *testing.T) {
 		return nil
 	}
 	graph.DoDepthFirst(onDiscover, onFinish)
-	graph.DoEdges(func (source, target Vertex) error {
+	graph.DoEdges(func(source, target Vertex) error {
 		if source != target && !IsValidNesting(info[source.(int)], info[target.(int)]) {
 			pretty := PrettyMap(info)
 			t.Errorf("Edge %v -> %v has bad finish time (%s)\n", source, target, pretty)
 		}
 		return nil
 	})
-			
+
 }
 
 func TestTopologicalWalk(t *testing.T) {
 	graph := New()
-	graph.AddEdge(1,2)
-	graph.AddEdge(2,3)
-	graph.AddEdge(3,4)
+	graph.AddEdge(1, 2)
+	graph.AddEdge(2, 3)
+	graph.AddEdge(3, 4)
 	time := 1
-	graph.DoTopological(func (vertex Vertex) error {
+	graph.DoTopological(func(vertex Vertex) error {
 		if vertex.(int) != time {
 			t.Errorf("Vertex %d processed at time %d\n", vertex.(int), time)
 		}
@@ -98,13 +97,13 @@ func TestTopologicalWalk(t *testing.T) {
 	})
 
 	graph = New()
-	graph.AddEdge(1,2)
-	graph.AddEdge(1,3)
-	graph.AddEdge(2,4)
-	graph.AddEdge(3,4)
+	graph.AddEdge(1, 2)
+	graph.AddEdge(1, 3)
+	graph.AddEdge(2, 4)
+	graph.AddEdge(3, 4)
 	when := new([5]int)
 	time = 1
-	graph.DoTopological(func (vertex Vertex) error {
+	graph.DoTopological(func(vertex Vertex) error {
 		when[time] = vertex.(int)
 		time++
 		return nil

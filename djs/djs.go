@@ -11,7 +11,7 @@ package djs
 
 // A node in the disjoint-set forest.
 type Node struct {
-	rank int
+	rank   int
 	parent *Node
 }
 

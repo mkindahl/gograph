@@ -17,10 +17,10 @@ type Graph struct {
 
 // VertexWalkFunc is a function called when walking vertices of a
 // graph.
-type VertexWalkFunc func (vertex Vertex) error
+type VertexWalkFunc func(vertex Vertex) error
 
 // EdgeWalkFunc is a function called when walking edges of a graph.
-type EdgeWalkFunc func (source, target Vertex) error
+type EdgeWalkFunc func(source, target Vertex) error
 
 // find is used to locate an element in a list by value. It will
 // return true and a pointer to the element if the element was found
@@ -56,7 +56,7 @@ func (graph *Graph) AddEdge(source, target Vertex) bool {
 	if !found {
 		if elem != nil {
 			lst.InsertAfter(target, elem)
-		} else {	
+		} else {
 			lst.PushBack(target)
 		}
 	}
@@ -67,7 +67,7 @@ func (graph *Graph) AddEdge(source, target Vertex) bool {
 // out-edges.  The function return 'true' if the vertex was
 // successfully added, and 'false' if the vertex already existed.
 func (graph *Graph) AddVertex(vertex Vertex) bool {
-	if (graph.edges[vertex] == nil) {
+	if graph.edges[vertex] == nil {
 		graph.edges[vertex] = list.New()
 		return true
 	}
@@ -79,7 +79,7 @@ func (graph *Graph) AddVertex(vertex Vertex) bool {
 // iteration will be aborted and the error returned to the caller.
 func (graph *Graph) DoVertices(walkFn VertexWalkFunc) error {
 	for vertex := range graph.edges {
-		if err := walkFn(vertex) ; err != nil {
+		if err := walkFn(vertex); err != nil {
 			return err
 		}
 	}
@@ -92,8 +92,8 @@ func (graph *Graph) DoVertices(walkFn VertexWalkFunc) error {
 // returned.
 func (graph *Graph) DoEdges(walkFn EdgeWalkFunc) error {
 	for vertex, edges := range graph.edges {
-		for elem := edges.Front() ; elem != nil ; elem = elem.Next() {
-			if err := walkFn(vertex, elem.Value) ; err != nil {
+		for elem := edges.Front(); elem != nil; elem = elem.Next() {
+			if err := walkFn(vertex, elem.Value); err != nil {
 				return err
 			}
 		}
@@ -111,8 +111,8 @@ func (graph *Graph) DoOutEdges(vertex Vertex, walkFn EdgeWalkFunc) error {
 	if lst == nil {
 		return nil
 	}
-	for elem := lst.Front() ; elem != nil ; elem = elem.Next() {
-		if err := walkFn(vertex, elem.Value) ; err != nil {
+	for elem := lst.Front(); elem != nil; elem = elem.Next() {
+		if err := walkFn(vertex, elem.Value); err != nil {
 			return err
 		}
 	}
@@ -128,11 +128,9 @@ func (graph *Graph) HasVertex(vertex Vertex) bool {
 // HasEdge check if an edge exists in the graph. Will return 'true' if
 // the edge exists, and 'false' otherwise.
 func (graph *Graph) HasEdge(source, target Vertex) bool {
-	if lst := graph.edges[source] ; lst != nil {
+	if lst := graph.edges[source]; lst != nil {
 		found, _ := find(lst, target)
 		return found
 	}
 	return false
 }
-
-
