@@ -16,8 +16,9 @@ consists of a set of vertices and a set of edges, where each edge
 connect two vertices. If the order of the vertices for an edge is
 important, the graph is *directed*, otherwise it is *undirected*.
 
-Currently, there is only support for directed graphs, but the plan is
-to add support for undirected graphs as well.
+Currently, there is only support for directed graphs and
+disjoint-sets, but the plan is to add support for undirected graphs as
+well.
 
 
 Directed Graphs

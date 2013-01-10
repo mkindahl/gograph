@@ -1,3 +1,8 @@
+// Copyright (c) 2013, Mats Kindahl. All rights reserved.
+//
+// Use of this source code is governed by a BSD license that can be
+// found in the README file.
+
 package directed
 
 import "testing"

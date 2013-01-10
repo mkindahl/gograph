@@ -1,7 +1,14 @@
+// Copyright (c) 2013, Mats Kindahl. All rights reserved.
+//
+// Use of this source code is governed by a BSD license that can be
+// found in the README file.
+
 package directed
 
-import "testing"
-import "fmt"
+import (
+	"testing"
+	"fmt"
+)
 
 // Structure holding discovery-finish information for this test.
 type Info struct {
@@ -48,17 +55,20 @@ func TestDepthFirstWalk(t *testing.T) {
 	graph.AddEdge(6,6)
 
 	info := make(map[int]*Info)
-	onDiscover := func (vertex Vertex, time int) {
+	time := 1
+	onDiscover := func (vertex Vertex) {
 		if info[vertex.(int)] == nil {
 			info[vertex.(int)] = new(Info)
 		}
 		info[vertex.(int)].discover = time
+		time++
 	}
-	onFinish := func (vertex Vertex, time int) {
+	onFinish := func (vertex Vertex) {
 		if info[vertex.(int)] == nil {
 			info[vertex.(int)] = new(Info)
 		}
 		info[vertex.(int)].finish = time
+		time++
 	}
 	graph.DoDepthFirst(onDiscover, onFinish)
 	graph.DoEdges(func (source, target Vertex) {

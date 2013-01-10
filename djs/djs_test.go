@@ -1,3 +1,8 @@
+// Copyright (c) 2013, Mats Kindahl. All rights reserved.
+//
+// Use of this source code is governed by a BSD license that can be
+// found in the README file.
+
 package djs
 
 import "testing"
@@ -74,7 +79,8 @@ func TestDisjointSet(t *testing.T) {
 	}
 
 	for i := range vec {
-		m, n := vec[i], vec[len(vec) - i - 1]
+		m := vec[i]
+		n := vec[len(vec) - i - 1]
 		if ds.Find(m) == ds.Find(n) {
 			t.Errorf("%d and %d should be in different sets", m, n)
 		}
