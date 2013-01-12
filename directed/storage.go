@@ -3,24 +3,26 @@
 // Use of this source code is governed by a BSD license that can be
 // found in the README file.
 
+// Package gograph provides support for creating and working with
+// directed graphs.
 package directed
 
 // Basic functionality for creating and manipulating directed graphs
 
 import "container/list"
 
+// Vertex is a convenience declaration for a vertex of the
+// graph. There are currently no expectations on the vertices of a
+// graph: any object that can be used as key in a map can be used.
 type Vertex interface{}
+
 type adjacencyList map[Vertex]*list.List
+
+// Graph is the respresentation of a directed graph. It contain all
+// the edges and vertices of the graph.
 type Graph struct {
 	edges adjacencyList
 }
-
-// VertexWalkFunc is a function called when walking vertices of a
-// graph.
-type VertexWalkFunc func(vertex Vertex) error
-
-// EdgeWalkFunc is a function called when walking edges of a graph.
-type EdgeWalkFunc func(source, target Vertex) error
 
 // find is used to locate an element in a list by value. It will
 // return true and a pointer to the element if the element was found
@@ -111,6 +113,26 @@ func (graph *Graph) RemoveVertex(vertex Vertex) bool {
 	return false
 }
 
+// HasVertex check if a vertex exists in the graph. Will return 'true'
+// if the vertex exists and 'false' otherwise.
+func (graph *Graph) HasVertex(vertex Vertex) bool {
+	return graph.edges[vertex] != nil
+}
+
+// HasEdge check if an edge exists in the graph. Will return 'true' if
+// the edge exists, and 'false' otherwise.
+func (graph *Graph) HasEdge(source, target Vertex) bool {
+	if lst := graph.edges[source]; lst != nil {
+		found, _ := find(lst, target)
+		return found
+	}
+	return false
+}
+
+// VertexWalkFunc is a function called when walking vertices of a
+// graph.
+type VertexWalkFunc func(vertex Vertex) error
+
 // DoVertices iterate over all the vertices of the graph calling
 // 'walkFn' with each vertex. If the walk function returns an error,
 // iteration will be aborted and the error returned to the caller.
@@ -122,6 +144,9 @@ func (graph *Graph) DoVertices(walkFn VertexWalkFunc) error {
 	}
 	return nil
 }
+
+// EdgeWalkFunc is a function called when walking edges of a graph.
+type EdgeWalkFunc func(source, target Vertex) error
 
 // DoEdges will iterate over all the edges of the graph calling
 // 'walkFn' with the source and target vertex of the edge. If the walk
@@ -154,20 +179,4 @@ func (graph *Graph) DoOutEdges(vertex Vertex, walkFn EdgeWalkFunc) error {
 		}
 	}
 	return nil
-}
-
-// HasVertex check if a vertex exists in the graph. Will return 'true'
-// if the vertex exists and 'false' otherwise.
-func (graph *Graph) HasVertex(vertex Vertex) bool {
-	return graph.edges[vertex] != nil
-}
-
-// HasEdge check if an edge exists in the graph. Will return 'true' if
-// the edge exists, and 'false' otherwise.
-func (graph *Graph) HasEdge(source, target Vertex) bool {
-	if lst := graph.edges[source]; lst != nil {
-		found, _ := find(lst, target)
-		return found
-	}
-	return false
 }
