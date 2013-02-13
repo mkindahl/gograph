@@ -3,13 +3,13 @@
 // Use of this source code is governed by a BSD license that can be
 // found in the README file.
 
-// Package gograph provides support for creating and working with
+// Package directed provides support for creating and working with
 // directed graphs.
 package directed
 
-// Basic functionality for creating and manipulating directed graphs
-
 import "container/list"
+
+//import "fmt"
 
 // Vertex is a convenience declaration for a vertex of the
 // graph. There are currently no expectations on the vertices of a
@@ -21,7 +21,8 @@ type adjacencyList map[Vertex]*list.List
 // Graph is the respresentation of a directed graph. It contain all
 // the edges and vertices of the graph.
 type Graph struct {
-	edges adjacencyList
+	edges                  adjacencyList
+	edgeCount, vertexCount int
 }
 
 // find is used to locate an element in a list by value. It will
@@ -61,6 +62,8 @@ func (graph *Graph) AddEdge(source, target Vertex) bool {
 		} else {
 			lst.PushBack(target)
 		}
+		graph.edgeCount++
+		//		fmt.Printf("Adding %d edges, giving %d\n", 1, graph.edgeCount)
 	}
 	return !found
 }
@@ -73,6 +76,8 @@ func (graph *Graph) RemoveEdge(source, target Vertex) bool {
 	lst := graph.edges[source]
 	if found, elem := find(lst, target); found {
 		lst.Remove(elem)
+		graph.edgeCount--
+		//		fmt.Printf("Removing %d edges, giving %d\n", 1, graph.edgeCount)
 		return true
 	}
 	return false
@@ -84,6 +89,8 @@ func (graph *Graph) RemoveEdge(source, target Vertex) bool {
 func (graph *Graph) AddVertex(vertex Vertex) bool {
 	if graph.edges[vertex] == nil {
 		graph.edges[vertex] = list.New()
+		graph.vertexCount++
+		//		fmt.Printf("Adding %d vertex, giving %d\n", 1, graph.vertexCount)
 		return true
 	}
 	return false
@@ -93,12 +100,14 @@ func (graph *Graph) AddVertex(vertex Vertex) bool {
 // connecting to the graph (either in- or out-edges) will also be
 // removed.
 func (graph *Graph) RemoveVertex(vertex Vertex) bool {
-
 	// It is guaranteed that the vertex is present in the map if
 	// it is present in the graph.
 	if graph.edges[vertex] != nil {
 		// Remove the vertex from the map to remove all
 		// out-edges.
+		graph.edgeCount -= graph.edges[vertex].Len()
+		// fmt.Printf("Removing %d edges, giving %d\n",
+		//            graph.edges[vertex].Len(), graph.edgeCount)
 		delete(graph.edges, vertex)
 
 		// Iterate over all the other lists to remove all
@@ -106,8 +115,12 @@ func (graph *Graph) RemoveVertex(vertex Vertex) bool {
 		for _, lst := range graph.edges {
 			if found, elem := find(lst, vertex); found {
 				lst.Remove(elem)
+				graph.edgeCount--
+				//				fmt.Printf("Removing %d edges, giving %d\n", 1, graph.edgeCount)
 			}
 		}
+		graph.vertexCount--
+		//		fmt.Printf("Removing %d vertex, giving %d\n", 1, graph.vertexCount)
 		return true
 	}
 	return false
@@ -129,8 +142,18 @@ func (graph *Graph) HasEdge(source, target Vertex) bool {
 	return false
 }
 
+// Vertices will return the number of vertices in the graph
+func (graph *Graph) Vertices() int {
+	return graph.vertexCount
+}
+
+// Edges will return the number of edges in the graph
+func (graph *Graph) Edges() int {
+	return graph.edgeCount
+}
+
 // VertexWalkFunc is a function called when walking vertices of a
-// graph.
+// graph. Parent can either be a vertex, or n
 type VertexWalkFunc func(vertex Vertex) error
 
 // DoVertices iterate over all the vertices of the graph calling

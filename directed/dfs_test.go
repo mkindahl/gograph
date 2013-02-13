@@ -16,23 +16,23 @@ type Info struct {
 }
 
 // Test if x is nested inside y
-func (x *Info) IsNestedIn(y *Info) bool {
+func (x *Info) isNestedIn(y *Info) bool {
 	return y.discover < x.discover && x.discover < x.finish && x.finish < y.finish
 }
 
 // Test if x is disjoint with y
-func (x *Info) IsDisjoint(y *Info) bool {
+func (x *Info) isDisjoint(y *Info) bool {
 	return x.discover < x.finish && x.finish < y.discover && y.discover < y.finish ||
 		y.discover < y.finish && y.finish < x.discover && x.discover < x.finish
 }
 
 // Test that the discovery-finish information satisfies the
 // parantheses theorem
-func IsValidNesting(x, y *Info) bool {
-	return x.IsDisjoint(y) || x.IsNestedIn(y) || y.IsNestedIn(x)
+func isValidNesting(x, y *Info) bool {
+	return x.isDisjoint(y) || x.isNestedIn(y) || y.isNestedIn(x)
 }
 
-func PrettyMap(input map[int]*Info) string {
+func prettyMap(input map[int]*Info) string {
 	result := "{ "
 	for k, v := range input {
 		result += fmt.Sprintf("%v: %v/%v, ", k, v.discover, v.finish)
@@ -73,42 +73,27 @@ func TestDepthFirstWalk(t *testing.T) {
 	}
 	graph.DoDepthFirst(onDiscover, onFinish)
 	graph.DoEdges(func(source, target Vertex) error {
-		if source != target && !IsValidNesting(info[source.(int)], info[target.(int)]) {
-			pretty := PrettyMap(info)
+		if source != target && !isValidNesting(info[source.(int)], info[target.(int)]) {
+			pretty := prettyMap(info)
 			t.Errorf("Edge %v -> %v has bad finish time (%s)\n", source, target, pretty)
 		}
 		return nil
 	})
-
 }
 
-func TestTopologicalWalk(t *testing.T) {
+// TestCircularGraph tests that the depth first walk stops also for
+// circular graphs.
+func TestCircularGraph(t *testing.T) {
 	graph := New()
 	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
-	graph.AddEdge(3, 4)
-	time := 1
-	graph.DoTopological(func(vertex Vertex) error {
-		if vertex.(int) != time {
-			t.Errorf("Vertex %d processed at time %d\n", vertex.(int), time)
+	graph.AddEdge(2, 1)
+	info := make(map[int]int)
+	graph.DoDepthFirst(func(vertex Vertex) error {
+		if info[vertex.(int)] == 0 {
+			info[vertex.(int)] = 1
+		} else {
+			t.Errorf("Edge already visited!")
 		}
-		time++
 		return nil
-	})
-
-	graph = New()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(1, 3)
-	graph.AddEdge(2, 4)
-	graph.AddEdge(3, 4)
-	when := new([5]int)
-	time = 1
-	graph.DoTopological(func(vertex Vertex) error {
-		when[time] = vertex.(int)
-		time++
-		return nil
-	})
-	if !(when[1] < when[2] && when[1] < when[3] && when[2] < when[4] && when[3] < when[4]) {
-		t.Errorf("Not in topological order %v\n", when)
-	}
+	}, nil)
 }
