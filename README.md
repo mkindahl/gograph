@@ -9,6 +9,7 @@ below.
 You can use the `go get` command to download and install the packages:
 
 > go get github.com/mkindahl/gograph/directed
+
 > go get github.com/mkindahl/gograph/djs
 
 Description
@@ -34,6 +35,10 @@ the graphs can be iterated over and processed in different orders.
 
 Currently, there is support for processing vertices in arbitrary
 order, in depth-first forest order, or in topological order.
+
+There is also support for computing any strongly connected components,
+that is, a subgraph of the graph such that there is a path between any
+pair of vertices in the subgraph.
 
 
 Disjoint-Set
