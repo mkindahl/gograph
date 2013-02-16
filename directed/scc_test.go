@@ -20,11 +20,11 @@ func checkCycleCount(t *testing.T, graph *Graph, expected int) {
 
 func checkCycle(t *testing.T, graph *Graph, vertices, edges int, check func(graph *Graph) bool) {
 	graph.DoCycles(func(subg *Graph) error {
-		if vs := subg.Vertices(); vs != vertices {
+		if vs := subg.Order(); vs != vertices {
 			t.Errorf("Wrong number of vertices (was %d, expected %d)", vs, vertices)
 		}
 
-		if es := subg.Edges(); es != edges {
+		if es := subg.Size(); es != edges {
 			t.Errorf("Wrong number of edges (was %d, expected %d)", es, edges)
 		}
 		if !check(graph) {

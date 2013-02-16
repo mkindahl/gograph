@@ -185,11 +185,11 @@ func TestRemoveVertex(t *testing.T) {
 }
 
 func checkGraphCount(t *testing.T, graph *Graph, vertices_expected, edges_expected int) {
-	vertices := graph.Vertices()
+	vertices := graph.Order()
 	if vertices_expected != vertices {
 		t.Errorf("Wrong number of vertices (was %d, expected %d)", vertices, vertices_expected)
 	}
-	edges := graph.Edges()
+	edges := graph.Size()
 	if edges_expected != edges {
 		t.Errorf("Wrong number of edges (was %d, expected %d)", edges, edges_expected)
 	}

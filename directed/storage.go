@@ -142,13 +142,15 @@ func (graph *Graph) HasEdge(source, target Vertex) bool {
 	return false
 }
 
-// Vertices will return the number of vertices in the graph
-func (graph *Graph) Vertices() int {
+// Order will return the order of the graph, that isnumber of vertices
+// in the graph.
+func (graph *Graph) Order() int {
 	return graph.vertexCount
 }
 
-// Edges will return the number of edges in the graph
-func (graph *Graph) Edges() int {
+// Size will return size of the graph, that is the number of edges in
+// the graph.
+func (graph *Graph) Size() int {
 	return graph.edgeCount
 }
 
