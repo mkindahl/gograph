@@ -142,7 +142,7 @@ func (graph *Graph) HasEdge(source, target Vertex) bool {
 	return false
 }
 
-// Order will return the order of the graph, that isnumber of vertices
+// Order will return the order of the graph, that is, the number of vertices
 // in the graph.
 func (graph *Graph) Order() int {
 	return graph.vertexCount
