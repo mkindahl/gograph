@@ -38,7 +38,8 @@ func (spw *shortestPathWalker) OnCrossEdge(parent, vertex Vertex) error {
 
 // Finds the shortest path between two vertices, if such a path exists. The list
 // returned will be either nil if no path was found (in which case, error will be set) or
-// a list of vertices starting with start and ending with stop.
+// a list of vertices starting with start and ending with stop. This is implemented using BFS
+// and has complexity O(|E|)
 func (graph *Graph) FindShortestPath(start, stop Vertex) (*list.List, error) {
 	w := new(shortestPathWalker)
 	w.Init()
