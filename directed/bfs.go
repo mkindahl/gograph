@@ -57,9 +57,9 @@ func (graph *Graph) breadthFirstVisit(walker Walker, seen map[Vertex]uint8, vert
 	return nil
 }
 
-// Uses the passed walker to traverse the graph breadth-first. The search
-// starts at the given vertex. Vertices with no path to the given vertex will 
-// NOT be discovered.
+// BreadthFirstWalkFromVertex uses the passed walker to traverse 
+// the graph breadth-first. The search starts at the given vertex. 
+// Vertices with no path to the given vertex will NOT be discovered.
 func (graph *Graph) BreadthFirstWalkFromVertex(walker Walker, vertex Vertex) {
 	seen := make(map[Vertex]uint8)
 	graph.breadthFirstVisit(walker, seen, vertex)
@@ -87,9 +87,9 @@ func (w *fillableWalker) OnCrossEdge(parent, vertex Vertex) error {
 }
 
 
-// Performs a breadth-first search starting at the given vertex, calling the
-// onDiscover function when a new vertex is discovered and the onFinish function
-// when a vertex has been traversed.
+// DoBreadthFirstWalkFromVertex performs a breadth-first search starting at 
+// the given vertex, calling the onDiscover function when a new vertex is
+// discovered and the onFinish function  when a vertex has been traversed.
 func (graph *Graph) DoBreadthFirstWalkFromVertex(startAt Vertex,onDiscover, onFinish VertexWalkFunc) {
 	walker := &fillableWalker {
 		onDiscover: onDiscover,
@@ -100,8 +100,9 @@ func (graph *Graph) DoBreadthFirstWalkFromVertex(startAt Vertex,onDiscover, onFi
 		
 }
 
-// Performs a breadth-first search walk over the entire graph, starting at an
-// arbitrary vertex and completing after all nodes in the graph are traversed.
+// DoBreadthFirstWalk performs a breadth-first search walk over the entire 
+// graph, starting at an  arbitrary vertex and completing after all nodes in 
+// the graph are traversed.
 func (graph *Graph) DoBreadthFirstWalk(onDiscover, onFinish VertexWalkFunc) {
 	walker := &fillableWalker {
 		onDiscover: onDiscover,
@@ -112,9 +113,9 @@ func (graph *Graph) DoBreadthFirstWalk(onDiscover, onFinish VertexWalkFunc) {
 		
 }
 
-// Uses the provided walker to perform a breadth-first search over the entire graph,
-// starting at an arbitrary vertex, and completing after all nodes in the graph are
-// traversed.
+// BreadthFirstWalk uses the provided walker to perform a breadth-first search 
+// over the entire graph, starting at an arbitrary vertex, and completing 
+// after all nodes in the graph are traversed.
 func (graph *Graph) BreadthFirstWalk(walker Walker) {
 	seen := make(map[Vertex]uint8)
 	graph.DoVertices(func (vertex Vertex) error {
