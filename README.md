@@ -33,8 +33,13 @@ Using this library, directed graphs can be constructed by creating a
 graph and adding vertices and edges to it. The vertices and edges of
 the graphs can be iterated over and processed in different orders.
 
-Currently, there is support for processing vertices in arbitrary
-order, in depth-first forest order, or in topological order.
+Currently, there is support for:
+- processing vertices in arbitrary order
+- processing vertices in depth-first forest order
+- processing vertices  in topological order
+- processing vertices in breadth-first forest order
+- performing breadth-first searches
+- finding shortest paths between vertices
 
 There is also support for computing any strongly connected components,
 that is, a subgraph of the graph such that there is a path between any
