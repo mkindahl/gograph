@@ -5,7 +5,10 @@
 
 package directed
 
-import "container/list"
+import (
+	"container/list"
+	"iter"
+)
 
 type topologicalWalker struct {
 	DefaultWalker
@@ -31,4 +34,20 @@ func (graph *Graph) DoTopological(onDiscover VertexWalkFunc) error {
 		}
 	}
 	return nil
+}
+
+// Topological returns an iterator over the vertices of the graph in
+// topological order.
+func (graph *Graph) Topological() iter.Seq[Vertex] {
+	return func(yield func(Vertex) bool) {
+		walker := &topologicalWalker{
+			vertices: list.New(),
+		}
+		graph.DepthFirstWalk(walker)
+		for elem := walker.vertices.Front(); elem != nil; elem = elem.Next() {
+			if !yield(elem.Value) {
+				return
+			}
+		}
+	}
 }

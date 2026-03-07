@@ -7,7 +7,15 @@
 // directed graphs.
 package directed
 
-import "container/list"
+import (
+	"container/list"
+	"errors"
+	"iter"
+)
+
+// errStop is a sentinel error used internally to stop callback-based
+// iteration from within iterator functions.
+var errStop = errors.New("stop iteration")
 
 //import "fmt"
 
@@ -204,4 +212,45 @@ func (graph *Graph) DoOutEdges(vertex Vertex, walkFn EdgeWalkFunc) error {
 		}
 	}
 	return nil
+}
+
+// Vertices returns an iterator over all vertices in the graph.
+func (graph *Graph) Vertices() iter.Seq[Vertex] {
+	return func(yield func(Vertex) bool) {
+		for vertex := range graph.edges {
+			if !yield(vertex) {
+				return
+			}
+		}
+	}
+}
+
+// Edges returns an iterator over all edges in the graph as
+// (source, target) pairs.
+func (graph *Graph) Edges() iter.Seq2[Vertex, Vertex] {
+	return func(yield func(Vertex, Vertex) bool) {
+		for vertex, edges := range graph.edges {
+			for elem := edges.Front(); elem != nil; elem = elem.Next() {
+				if !yield(vertex, elem.Value) {
+					return
+				}
+			}
+		}
+	}
+}
+
+// OutEdges returns an iterator over the out-edges of a vertex as
+// (source, target) pairs.
+func (graph *Graph) OutEdges(vertex Vertex) iter.Seq2[Vertex, Vertex] {
+	return func(yield func(Vertex, Vertex) bool) {
+		lst := graph.edges[vertex]
+		if lst == nil {
+			return
+		}
+		for elem := lst.Front(); elem != nil; elem = elem.Next() {
+			if !yield(vertex, elem.Value) {
+				return
+			}
+		}
+	}
 }

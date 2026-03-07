@@ -5,7 +5,10 @@
 
 package directed
 
-import "fmt"
+import (
+	"fmt"
+	"iter"
+)
 
 // Walker interface is used by the depth-first visit function. All the
 // methods have to be implemented. To help with implementing default
@@ -159,4 +162,64 @@ func (graph *Graph) DoDepthFirst(onDiscover, onFinish VertexWalkFunc) {
 		info:       make(map[Vertex]*basicInfo),
 	}
 	graph.DepthFirstWalk(walker)
+}
+
+// DepthFirst returns an iterator that yields TraversalEvent values
+// for a depth-first traversal of the entire graph.
+func (graph *Graph) DepthFirst() iter.Seq[TraversalEvent] {
+	return func(yield func(TraversalEvent) bool) {
+		walker := &eventWalker{yield: yield}
+		graph.DepthFirstWalk(walker)
+	}
+}
+
+// eventWalker is a Walker that yields TraversalEvent values to an
+// iterator yield function.
+type eventWalker struct {
+	yield   func(TraversalEvent) bool
+	stopped bool
+}
+
+func (w *eventWalker) OnDiscover(parent, vertex Vertex) error {
+	if w.stopped {
+		return errStop
+	}
+	if !w.yield(TraversalEvent{Kind: Discover, Parent: parent, Vertex: vertex}) {
+		w.stopped = true
+		return errStop
+	}
+	return nil
+}
+
+func (w *eventWalker) OnFinish(parent, vertex Vertex) error {
+	if w.stopped {
+		return errStop
+	}
+	if !w.yield(TraversalEvent{Kind: Finish, Parent: parent, Vertex: vertex}) {
+		w.stopped = true
+		return errStop
+	}
+	return nil
+}
+
+func (w *eventWalker) OnBackEdge(source, target Vertex) error {
+	if w.stopped {
+		return errStop
+	}
+	if !w.yield(TraversalEvent{Kind: BackEdge, Parent: source, Vertex: target}) {
+		w.stopped = true
+		return errStop
+	}
+	return nil
+}
+
+func (w *eventWalker) OnCrossEdge(source, target Vertex) error {
+	if w.stopped {
+		return errStop
+	}
+	if !w.yield(TraversalEvent{Kind: CrossEdge, Parent: source, Vertex: target}) {
+		w.stopped = true
+		return errStop
+	}
+	return nil
 }

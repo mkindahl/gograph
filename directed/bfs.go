@@ -5,7 +5,10 @@
 
 package directed
 
-import "container/list"
+import (
+	"container/list"
+	"iter"
+)
 
 
 type vertexPair struct {
@@ -125,4 +128,23 @@ func (graph *Graph) BreadthFirstWalk(walker Walker) {
 
 		return nil
 	})
+}
+
+// BreadthFirst returns an iterator that yields TraversalEvent values
+// for a breadth-first traversal of the entire graph.
+func (graph *Graph) BreadthFirst() iter.Seq[TraversalEvent] {
+	return func(yield func(TraversalEvent) bool) {
+		walker := &eventWalker{yield: yield}
+		graph.BreadthFirstWalk(walker)
+	}
+}
+
+// BreadthFirstFrom returns an iterator that yields TraversalEvent
+// values for a breadth-first traversal starting from the given vertex.
+// Only vertices reachable from the start vertex will be visited.
+func (graph *Graph) BreadthFirstFrom(vertex Vertex) iter.Seq[TraversalEvent] {
+	return func(yield func(TraversalEvent) bool) {
+		walker := &eventWalker{yield: yield}
+		graph.BreadthFirstWalkFromVertex(walker, vertex)
+	}
 }

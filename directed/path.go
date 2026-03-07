@@ -61,8 +61,37 @@ func (graph *Graph) FindShortestPath(start, stop Vertex) (*list.List, error) {
 			return nil, errors.New("Could not find path")
 		}
 		last = next
-		
+
 	}
 
-	
+
+}
+
+// ShortestPath finds the shortest path between two vertices, returning
+// a slice of vertices from start to stop. Returns an error if no path
+// exists.
+func (graph *Graph) ShortestPath(start, stop Vertex) ([]Vertex, error) {
+	w := new(shortestPathWalker)
+	w.Init()
+	w.targetVertex = stop
+
+	graph.BreadthFirstWalkFromVertex(w, start)
+
+	var path []Vertex
+	last := stop
+	for {
+		path = append(path, nil)
+		copy(path[1:], path)
+		path[0] = last
+
+		if last == start {
+			return path, nil
+		}
+
+		next, ok := w.childOf[last]
+		if !ok {
+			return nil, errors.New("Could not find path")
+		}
+		last = next
+	}
 }

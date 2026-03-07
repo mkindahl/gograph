@@ -63,3 +63,49 @@ func TestCycleWalkCount(t *testing.T) {
 	graph.AddEdge(7, 6)
 	checkCycleCount(t, graph, 2)
 }
+
+func TestCyclesIterator(t *testing.T) {
+	graph := New()
+	graph.AddEdge(1, 2)
+	graph.AddEdge(2, 3)
+	graph.AddEdge(3, 1)
+	graph.AddEdge(6, 7)
+	graph.AddEdge(7, 6)
+	count := 0
+	for range graph.Cycles() {
+		count++
+	}
+	if count != 2 {
+		t.Errorf("Expected 2 SCCs, got %d", count)
+	}
+}
+
+func TestCyclesIteratorNoCycles(t *testing.T) {
+	graph := New()
+	graph.AddEdge(1, 2)
+	graph.AddEdge(2, 3)
+	count := 0
+	for range graph.Cycles() {
+		count++
+	}
+	if count != 0 {
+		t.Errorf("Expected 0 SCCs, got %d", count)
+	}
+}
+
+func TestCyclesIteratorBreak(t *testing.T) {
+	graph := New()
+	graph.AddEdge(1, 2)
+	graph.AddEdge(2, 3)
+	graph.AddEdge(3, 1)
+	graph.AddEdge(6, 7)
+	graph.AddEdge(7, 6)
+	count := 0
+	for range graph.Cycles() {
+		count++
+		break
+	}
+	if count != 1 {
+		t.Errorf("Expected 1, got %d", count)
+	}
+}

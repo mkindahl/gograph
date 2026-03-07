@@ -7,6 +7,7 @@ package directed
 
 import (
 	"container/list"
+	"iter"
 )
 
 type sccInfo struct {
@@ -121,4 +122,22 @@ func (graph *Graph) DoCycles(onComponent GraphWalkFunc) {
 		stack:       list.New(),
 	}
 	graph.DepthFirstWalk(walker)
+}
+
+// Cycles returns an iterator over the strongly connected components
+// of size larger than 1 found in the graph. Each yielded value is a
+// subgraph containing the vertices and edges of that SCC.
+func (graph *Graph) Cycles() iter.Seq[*Graph] {
+	return func(yield func(*Graph) bool) {
+		var sccs []*Graph
+		graph.DoCycles(func(scc *Graph) error {
+			sccs = append(sccs, scc)
+			return nil
+		})
+		for _, scc := range sccs {
+			if !yield(scc) {
+				return
+			}
+		}
+	}
 }

@@ -97,3 +97,62 @@ func TestCircularGraph(t *testing.T) {
 		return nil
 	}, nil)
 }
+
+func TestDepthFirstIterator(t *testing.T) {
+	graph := New()
+	graph.AddEdge(1, 2)
+	graph.AddEdge(2, 3)
+
+	discovered := make(map[int]bool)
+	finished := make(map[int]bool)
+	for event := range graph.DepthFirst() {
+		switch event.Kind {
+		case Discover:
+			discovered[event.Vertex.(int)] = true
+		case Finish:
+			finished[event.Vertex.(int)] = true
+		}
+	}
+	for _, v := range []int{1, 2, 3} {
+		if !discovered[v] {
+			t.Errorf("Vertex %d not discovered", v)
+		}
+		if !finished[v] {
+			t.Errorf("Vertex %d not finished", v)
+		}
+	}
+}
+
+func TestDepthFirstIteratorBackEdge(t *testing.T) {
+	graph := New()
+	graph.AddEdge(1, 2)
+	graph.AddEdge(2, 3)
+	graph.AddEdge(3, 1)
+
+	hasBackEdge := false
+	for event := range graph.DepthFirst() {
+		if event.Kind == BackEdge {
+			hasBackEdge = true
+		}
+	}
+	if !hasBackEdge {
+		t.Errorf("Expected a back edge in cyclic graph")
+	}
+}
+
+func TestDepthFirstIteratorBreak(t *testing.T) {
+	graph := New()
+	graph.AddEdge(1, 2)
+	graph.AddEdge(2, 3)
+	graph.AddEdge(3, 4)
+	count := 0
+	for range graph.DepthFirst() {
+		count++
+		if count >= 3 {
+			break
+		}
+	}
+	if count != 3 {
+		t.Errorf("Expected 3 events, got %d", count)
+	}
+}

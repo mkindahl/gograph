@@ -258,6 +258,73 @@ func TestBreadthFirstWalk(t *testing.T) {
 	if _, ok := info["2"]; !ok {
 		t.Fatalf("Could not find all nodes in breadth first walk")
 	}
-	
 
+
+}
+
+func TestBreadthFirstIterator(t *testing.T) {
+	graph := New()
+	graph.AddEdge("a", "b")
+	graph.AddEdge("a", "c")
+	graph.AddEdge("b", "d")
+	graph.AddEdge("1", "2")
+
+	discovered := make(map[string]bool)
+	finished := make(map[string]bool)
+	for event := range graph.BreadthFirst() {
+		switch event.Kind {
+		case Discover:
+			discovered[event.Vertex.(string)] = true
+		case Finish:
+			finished[event.Vertex.(string)] = true
+		}
+	}
+	for _, v := range []string{"a", "b", "c", "d", "1", "2"} {
+		if !discovered[v] {
+			t.Errorf("Vertex %s not discovered", v)
+		}
+		if !finished[v] {
+			t.Errorf("Vertex %s not finished", v)
+		}
+	}
+}
+
+func TestBreadthFirstFromIterator(t *testing.T) {
+	graph := New()
+	graph.AddEdge("a", "b")
+	graph.AddEdge("a", "c")
+	graph.AddEdge("b", "d")
+	graph.AddEdge("1", "2")
+
+	discovered := make(map[string]bool)
+	for event := range graph.BreadthFirstFrom("a") {
+		if event.Kind == Discover {
+			discovered[event.Vertex.(string)] = true
+		}
+	}
+	for _, v := range []string{"a", "b", "c", "d"} {
+		if !discovered[v] {
+			t.Errorf("Vertex %s not discovered", v)
+		}
+	}
+	if discovered["1"] || discovered["2"] {
+		t.Errorf("Unreachable vertices should not be discovered")
+	}
+}
+
+func TestBreadthFirstFromIteratorBreak(t *testing.T) {
+	graph := New()
+	graph.AddEdge("a", "b")
+	graph.AddEdge("b", "c")
+	graph.AddEdge("c", "d")
+	count := 0
+	for range graph.BreadthFirstFrom("a") {
+		count++
+		if count >= 3 {
+			break
+		}
+	}
+	if count != 3 {
+		t.Errorf("Expected 3 events, got %d", count)
+	}
 }

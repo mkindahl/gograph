@@ -53,6 +53,53 @@ func TestShortestPath(t *testing.T) {
 	if curr != nil {
 		t.Fatalf("Path extends beyond endpoint\n")
 	}
-	
-	
+}
+
+func TestShortestPathSlice(t *testing.T) {
+	graph := New()
+	graph.AddEdge("a", "b")
+	graph.AddEdge("a", "c")
+	graph.AddEdge("b", "d")
+	graph.AddEdge("b", "e")
+	graph.AddEdge("e", "h")
+	graph.AddEdge("c", "f")
+	graph.AddEdge("c", "g")
+
+	path, err := graph.ShortestPath("a", "h")
+	if err != nil {
+		t.Fatalf("Error: %v", err)
+	}
+	expected := []string{"a", "b", "e", "h"}
+	if len(path) != len(expected) {
+		t.Fatalf("Expected path length %d, got %d", len(expected), len(path))
+	}
+	for i, v := range path {
+		if v.(string) != expected[i] {
+			t.Errorf("Path[%d] = %v, expected %s", i, v, expected[i])
+		}
+	}
+}
+
+func TestShortestPathSliceNoPath(t *testing.T) {
+	graph := New()
+	graph.AddEdge("a", "b")
+	graph.AddEdge("c", "d")
+
+	_, err := graph.ShortestPath("a", "d")
+	if err == nil {
+		t.Fatalf("Expected error for disconnected vertices")
+	}
+}
+
+func TestShortestPathSliceSameVertex(t *testing.T) {
+	graph := New()
+	graph.AddVertex("a")
+
+	path, err := graph.ShortestPath("a", "a")
+	if err != nil {
+		t.Fatalf("Error: %v", err)
+	}
+	if len(path) != 1 || path[0].(string) != "a" {
+		t.Errorf("Expected [a], got %v", path)
+	}
 }
