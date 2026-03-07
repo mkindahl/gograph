@@ -5,49 +5,33 @@
 
 package directed
 
-import (
-	"container/list"
-	"iter"
-)
-
-type topologicalWalker struct {
-	DefaultWalker
-	vertices *list.List
-}
-
-func (walker *topologicalWalker) OnFinish(parent, vertex Vertex) error {
-	walker.vertices.PushFront(vertex)
-	return nil
-}
-
-// DoTopological will process the graph in topological order and call
-// onDiscover with each step.
-func (graph *Graph) DoTopological(onDiscover VertexWalkFunc) error {
-	walker := &topologicalWalker{
-		vertices: list.New(),
-	}
-	graph.DepthFirstWalk(walker)
-	// Process elements in reverse order of finishing time
-	for elem := walker.vertices.Front(); elem != nil; elem = elem.Next() {
-		if err := onDiscover(elem.Value); err != nil {
-			return err
-		}
-	}
-	return nil
-}
+import "iter"
 
 // Topological returns an iterator over the vertices of the graph in
 // topological order.
-func (graph *Graph) Topological() iter.Seq[Vertex] {
-	return func(yield func(Vertex) bool) {
-		walker := &topologicalWalker{
-			vertices: list.New(),
+func (graph *Graph[V]) Topological() iter.Seq[V] {
+	return func(yield func(V) bool) {
+		var order []V
+		for event := range graph.DepthFirst() {
+			if event.Kind == Finish {
+				order = append(order, event.Vertex)
+			}
 		}
-		graph.DepthFirstWalk(walker)
-		for elem := walker.vertices.Front(); elem != nil; elem = elem.Next() {
-			if !yield(elem.Value) {
+		for i := len(order) - 1; i >= 0; i-- {
+			if !yield(order[i]) {
 				return
 			}
 		}
 	}
+}
+
+// DoTopological will process the graph in topological order and call
+// onDiscover with each step.
+func (graph *Graph[V]) DoTopological(onDiscover VertexWalkFunc[V]) error {
+	for v := range graph.Topological() {
+		if err := onDiscover(v); err != nil {
+			return err
+		}
+	}
+	return nil
 }

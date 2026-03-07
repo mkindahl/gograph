@@ -7,9 +7,9 @@ package directed
 
 import "testing"
 
-func checkCycleCount(t *testing.T, graph *Graph, expected int) {
+func checkCycleCount(t *testing.T, graph *Graph[int], expected int) {
 	count := 0
-	graph.DoCycles(func(graph *Graph) error {
+	graph.DoCycles(func(graph *Graph[int]) error {
 		count++
 		return nil
 	})
@@ -18,8 +18,8 @@ func checkCycleCount(t *testing.T, graph *Graph, expected int) {
 	}
 }
 
-func checkCycle(t *testing.T, graph *Graph, vertices, edges int, check func(graph *Graph) bool) {
-	graph.DoCycles(func(subg *Graph) error {
+func checkCycle(t *testing.T, graph *Graph[int], vertices, edges int, check func(graph *Graph[int]) bool) {
+	graph.DoCycles(func(subg *Graph[int]) error {
 		if vs := subg.Order(); vs != vertices {
 			t.Errorf("Wrong number of vertices (was %d, expected %d)", vs, vertices)
 		}
@@ -35,14 +35,14 @@ func checkCycle(t *testing.T, graph *Graph, vertices, edges int, check func(grap
 }
 
 func TestCycleWalkCount(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 1)
 	graph.AddEdge(1, 2)
 	graph.AddEdge(2, 3)
 	checkCycleCount(t, graph, 0)
 	graph.AddEdge(3, 1)
 	checkCycleCount(t, graph, 1)
-	checkCycle(t, graph, 3, 4, func(graph *Graph) bool {
+	checkCycle(t, graph, 3, 4, func(graph *Graph[int]) bool {
 		return graph.HasEdge(1, 2) && graph.HasEdge(2, 3) && graph.HasEdge(3, 1)
 	})
 	graph.AddEdge(1, 4)
@@ -50,12 +50,12 @@ func TestCycleWalkCount(t *testing.T) {
 	graph.AddEdge(3, 6)
 	graph.AddEdge(6, 7)
 	checkCycleCount(t, graph, 1)
-	checkCycle(t, graph, 3, 4, func(graph *Graph) bool {
+	checkCycle(t, graph, 3, 4, func(graph *Graph[int]) bool {
 		return graph.HasEdge(1, 2) && graph.HasEdge(2, 3) && graph.HasEdge(3, 1)
 	})
 	graph.AddEdge(4, 1)
 	checkCycleCount(t, graph, 1)
-	checkCycle(t, graph, 4, 6, func(graph *Graph) bool {
+	checkCycle(t, graph, 4, 6, func(graph *Graph[int]) bool {
 		return graph.HasEdge(1, 2) && graph.HasEdge(2, 3) &&
 			graph.HasEdge(3, 1) && graph.HasEdge(1, 4) &&
 			graph.HasEdge(4, 1)
@@ -65,7 +65,7 @@ func TestCycleWalkCount(t *testing.T) {
 }
 
 func TestCyclesIterator(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(2, 3)
 	graph.AddEdge(3, 1)
@@ -81,7 +81,7 @@ func TestCyclesIterator(t *testing.T) {
 }
 
 func TestCyclesIteratorNoCycles(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(2, 3)
 	count := 0
@@ -94,7 +94,7 @@ func TestCyclesIteratorNoCycles(t *testing.T) {
 }
 
 func TestCyclesIteratorBreak(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(2, 3)
 	graph.AddEdge(3, 1)

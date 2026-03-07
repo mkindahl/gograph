@@ -17,7 +17,7 @@ const (
 
 // TraversalEvent represents a single event during a DFS or BFS
 // traversal of a graph.
-type TraversalEvent struct {
+type TraversalEvent[V comparable] struct {
 	Kind           EventKind
-	Parent, Vertex Vertex
+	Parent, Vertex V
 }

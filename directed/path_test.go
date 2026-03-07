@@ -9,7 +9,7 @@ import "testing"
 
 func TestShortestPath(t *testing.T) {
 
-	graph := New()
+	graph := New[string]()
 
 	graph.AddEdge("a", "b")
 	graph.AddEdge("a", "c")
@@ -23,11 +23,10 @@ func TestShortestPath(t *testing.T) {
 
 	// the shortest path from a to h should be: a b e h
 	path, err := graph.FindShortestPath("a", "h")
-	
+
 	if err != nil {
 		t.Fatalf("Error: %v\n", err)
 	}
-	
 
 	curr := path.Front()
 	if curr.Value != "a" {
@@ -38,7 +37,7 @@ func TestShortestPath(t *testing.T) {
 	if curr.Value != "b" {
 		t.Fatalf("Invalid path\n")
 	}
-	
+
 	curr = curr.Next()
 	if curr.Value != "e" {
 		t.Fatalf("Invalid path\n")
@@ -56,7 +55,7 @@ func TestShortestPath(t *testing.T) {
 }
 
 func TestShortestPathSlice(t *testing.T) {
-	graph := New()
+	graph := New[string]()
 	graph.AddEdge("a", "b")
 	graph.AddEdge("a", "c")
 	graph.AddEdge("b", "d")
@@ -74,14 +73,14 @@ func TestShortestPathSlice(t *testing.T) {
 		t.Fatalf("Expected path length %d, got %d", len(expected), len(path))
 	}
 	for i, v := range path {
-		if v.(string) != expected[i] {
+		if v != expected[i] {
 			t.Errorf("Path[%d] = %v, expected %s", i, v, expected[i])
 		}
 	}
 }
 
 func TestShortestPathSliceNoPath(t *testing.T) {
-	graph := New()
+	graph := New[string]()
 	graph.AddEdge("a", "b")
 	graph.AddEdge("c", "d")
 
@@ -92,14 +91,14 @@ func TestShortestPathSliceNoPath(t *testing.T) {
 }
 
 func TestShortestPathSliceSameVertex(t *testing.T) {
-	graph := New()
+	graph := New[string]()
 	graph.AddVertex("a")
 
 	path, err := graph.ShortestPath("a", "a")
 	if err != nil {
 		t.Fatalf("Error: %v", err)
 	}
-	if len(path) != 1 || path[0].(string) != "a" {
+	if len(path) != 1 || path[0] != "a" {
 		t.Errorf("Expected [a], got %v", path)
 	}
 }

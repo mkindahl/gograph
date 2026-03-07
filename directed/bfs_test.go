@@ -9,7 +9,7 @@ import "testing"
 
 func TestNonCyclicBreadthFirstWalk(t *testing.T) {
 
-	graph := New()
+	graph := New[string]()
 
 	// this is the graph that wikipedia uses as an example for BFS
 	// a visualization can be found here:
@@ -26,14 +26,14 @@ func TestNonCyclicBreadthFirstWalk(t *testing.T) {
 
 	graph.AddEdge("1", "2")
 
-	info := make(map[Vertex]int)
+	info := make(map[string]int)
 	fin := 0
 
-	onDiscover := func(vertex Vertex) error {
+	onDiscover := func(vertex string) error {
 		return nil
 	}
 
-	onFinish := func(vertex Vertex) error {
+	onFinish := func(vertex string) error {
 		info[vertex] = fin
 		fin++
 		return nil
@@ -77,7 +77,6 @@ func TestNonCyclicBreadthFirstWalk(t *testing.T) {
 		t.Fatalf("Incorrect ordering")
 	}
 
-
 	if info["e"] >= info["h"] {
 		t.Fatalf("Incorrect ordering")
 	}
@@ -90,19 +89,18 @@ func TestNonCyclicBreadthFirstWalk(t *testing.T) {
 		t.Fatalf("Incorrect ordering")
 	}
 
-	if _, ok := info['1']; ok {
+	if _, ok := info["1"]; ok {
 		t.Fatalf("Found unreachable node")
 	}
 
-
-	if _, ok := info['2']; ok {
+	if _, ok := info["2"]; ok {
 		t.Fatalf("Found unreachable node")
 	}
 
 }
 
 func TestCyclicBreadthFirstWalk(t *testing.T) {
-	graph := New()
+	graph := New[string]()
 
 	// this is the graph that wikipedia uses as an example for BFS
 	// a visualization can be found here:
@@ -117,15 +115,14 @@ func TestCyclicBreadthFirstWalk(t *testing.T) {
 	graph.AddEdge("c", "g")
 	graph.AddEdge("h", "a")
 
-
-	info := make(map[Vertex]int)
+	info := make(map[string]int)
 	fin := 0
 
-	onDiscover := func(vertex Vertex) error {
+	onDiscover := func(vertex string) error {
 		return nil
 	}
 
-	onFinish := func(vertex Vertex) error {
+	onFinish := func(vertex string) error {
 		info[vertex] = fin
 		fin++
 		return nil
@@ -168,7 +165,6 @@ func TestCyclicBreadthFirstWalk(t *testing.T) {
 	if info["d"] >= info["h"] {
 		t.Fatalf("Incorrect ordering")
 	}
-
 
 	if info["e"] >= info["h"] {
 		t.Fatalf("Incorrect ordering")
@@ -185,7 +181,7 @@ func TestCyclicBreadthFirstWalk(t *testing.T) {
 }
 
 func TestBreadthFirstWalk(t *testing.T) {
-	graph := New()
+	graph := New[string]()
 
 	// this is the graph that wikipedia uses as an example for BFS
 	// a visualization can be found here:
@@ -203,15 +199,14 @@ func TestBreadthFirstWalk(t *testing.T) {
 
 	graph.AddEdge("1", "2")
 
-
-	info := make(map[Vertex]int)
+	info := make(map[string]int)
 	fin := 0
 
-	onDiscover := func(vertex Vertex) error {
+	onDiscover := func(vertex string) error {
 		return nil
 	}
 
-	onFinish := func(vertex Vertex) error {
+	onFinish := func(vertex string) error {
 		info[vertex] = fin
 		fin++
 		return nil
@@ -219,51 +214,15 @@ func TestBreadthFirstWalk(t *testing.T) {
 
 	graph.DoBreadthFirstWalk(onDiscover, onFinish)
 
-	if _, ok := info["a"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
+	for _, v := range []string{"a", "b", "c", "d", "e", "f", "g", "h", "1", "2"} {
+		if _, ok := info[v]; !ok {
+			t.Fatalf("Could not find node %s in breadth first walk", v)
+		}
 	}
-
-	if _, ok := info["b"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-	if _, ok := info["c"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-	if _, ok := info["d"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-	if _, ok := info["e"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-	if _, ok := info["f"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-	if _, ok := info["g"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-	if _, ok := info["h"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-	if _, ok := info["1"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-	if _, ok := info["2"]; !ok {
-		t.Fatalf("Could not find all nodes in breadth first walk")
-	}
-
-
 }
 
 func TestBreadthFirstIterator(t *testing.T) {
-	graph := New()
+	graph := New[string]()
 	graph.AddEdge("a", "b")
 	graph.AddEdge("a", "c")
 	graph.AddEdge("b", "d")
@@ -274,9 +233,9 @@ func TestBreadthFirstIterator(t *testing.T) {
 	for event := range graph.BreadthFirst() {
 		switch event.Kind {
 		case Discover:
-			discovered[event.Vertex.(string)] = true
+			discovered[event.Vertex] = true
 		case Finish:
-			finished[event.Vertex.(string)] = true
+			finished[event.Vertex] = true
 		}
 	}
 	for _, v := range []string{"a", "b", "c", "d", "1", "2"} {
@@ -290,7 +249,7 @@ func TestBreadthFirstIterator(t *testing.T) {
 }
 
 func TestBreadthFirstFromIterator(t *testing.T) {
-	graph := New()
+	graph := New[string]()
 	graph.AddEdge("a", "b")
 	graph.AddEdge("a", "c")
 	graph.AddEdge("b", "d")
@@ -299,7 +258,7 @@ func TestBreadthFirstFromIterator(t *testing.T) {
 	discovered := make(map[string]bool)
 	for event := range graph.BreadthFirstFrom("a") {
 		if event.Kind == Discover {
-			discovered[event.Vertex.(string)] = true
+			discovered[event.Vertex] = true
 		}
 	}
 	for _, v := range []string{"a", "b", "c", "d"} {
@@ -313,7 +272,7 @@ func TestBreadthFirstFromIterator(t *testing.T) {
 }
 
 func TestBreadthFirstFromIteratorBreak(t *testing.T) {
-	graph := New()
+	graph := New[string]()
 	graph.AddEdge("a", "b")
 	graph.AddEdge("b", "c")
 	graph.AddEdge("c", "d")

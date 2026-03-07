@@ -5,10 +5,7 @@
 
 package directed
 
-import (
-	"container/list"
-	"iter"
-)
+import "iter"
 
 type sccInfo struct {
 	number, low int
@@ -17,89 +14,79 @@ type sccInfo struct {
 // GraphWalkFunc is a function called on subgraphs of a graph, for
 // example, when iterating over the strongly connected components of a
 // graph.
-type GraphWalkFunc func(graph *Graph) error
+type GraphWalkFunc[V comparable] func(graph *Graph[V]) error
 
-// sccWalker is used to perform a discovery of the SCCs (Strongly
-// Connected Components) in a graph.
-type sccWalker struct {
-	DefaultWalker
-	onComponent GraphWalkFunc
-	time        int
-	info        map[Vertex]*sccInfo
-	stack       *list.List
-	graph       *Graph
-}
+// Cycles returns an iterator over the strongly connected components
+// of size larger than 1 found in the graph. Each yielded value is a
+// subgraph containing the vertices and edges of that SCC.
+func (graph *Graph[V]) Cycles() iter.Seq[*Graph[V]] {
+	return func(yield func(*Graph[V]) bool) {
+		info := make(map[V]*sccInfo)
+		var stack []V
+		time := 0
 
-func (walker *sccWalker) OnDiscover(parent, vertex Vertex) error {
-	walker.time++
-	vinfo := &sccInfo{
-		number: walker.time,
-		low:    walker.time,
-	}
-	walker.info[vertex] = vinfo
-	walker.stack.PushBack(vertex)
-	if parent != nil {
-		pinfo := walker.info[parent]
-		if vinfo.low < pinfo.low {
-			pinfo.low = vinfo.low
-		}
-	}
-	return nil
-}
-
-func (walker *sccWalker) OnBackEdge(source, target Vertex) error {
-	sinfo := walker.info[source]
-	tinfo := walker.info[target]
-	if tinfo.low < sinfo.low {
-		sinfo.low = tinfo.low
-	}
-	return nil
-}
-
-func (walker *sccWalker) OnFinish(parent, vertex Vertex) error {
-	vinfo := walker.info[vertex]
-	pinfo := walker.info[parent]
-	if pinfo != nil && vinfo.low < pinfo.low {
-		pinfo.low = vinfo.low
-	}
-
-	// Check if this is an SCC root vertex
-	if vinfo.number == vinfo.low {
-		// Pop all vertices from stack until we find the root
-		scc := New()
-		for {
-			elem := walker.stack.Back()
-			if elem == nil {
-				break
-			}
-			svertex := elem.Value
-			walker.stack.Remove(elem)
-			scc.AddVertex(svertex)
-			if svertex == vertex {
-				break
-			}
-		}
-
-		// Only report SCCs with more than one vertex
-		if scc.Order() > 1 {
-			// Add all edges in the original graph between
-			// vertices in the SCC graph.
-			addEdge := func(source, target Vertex) error {
-				if scc.HasVertex(target) {
-					scc.AddEdge(source, target)
+		for event := range graph.DepthFirst() {
+			switch event.Kind {
+			case Discover:
+				time++
+				vinfo := &sccInfo{number: time, low: time}
+				info[event.Vertex] = vinfo
+				stack = append(stack, event.Vertex)
+				var zero V
+				if event.Parent != zero {
+					pinfo := info[event.Parent]
+					if vinfo.low < pinfo.low {
+						pinfo.low = vinfo.low
+					}
 				}
-				return nil
-			}
-			scc.DoVertices(func(vtx Vertex) error {
-				walker.graph.DoOutEdges(vtx, addEdge)
-				return nil
-			})
-			if error := walker.onComponent(scc); error != nil {
-				return error
+
+			case BackEdge:
+				sinfo := info[event.Parent]
+				tinfo := info[event.Vertex]
+				if tinfo.low < sinfo.low {
+					sinfo.low = tinfo.low
+				}
+
+			case Finish:
+				vinfo := info[event.Vertex]
+				var zero V
+				if event.Parent != zero {
+					pinfo := info[event.Parent]
+					if vinfo.low < pinfo.low {
+						pinfo.low = vinfo.low
+					}
+				}
+
+				if vinfo.number == vinfo.low {
+					scc := New[V]()
+					for {
+						if len(stack) == 0 {
+							break
+						}
+						svertex := stack[len(stack)-1]
+						stack = stack[:len(stack)-1]
+						scc.AddVertex(svertex)
+						if svertex == event.Vertex {
+							break
+						}
+					}
+
+					if scc.Order() > 1 {
+						for vtx := range scc.Vertices() {
+							for _, target := range graph.OutEdges(vtx) {
+								if scc.HasVertex(target) {
+									scc.AddEdge(vtx, target)
+								}
+							}
+						}
+						if !yield(scc) {
+							return
+						}
+					}
+				}
 			}
 		}
 	}
-	return nil
 }
 
 // DoCycles will call the onComponent function for each SCC (strongly
@@ -114,30 +101,10 @@ func (walker *sccWalker) OnFinish(parent, vertex Vertex) error {
 // The intention is normally to use the algorithm to find cycles in
 // the graph, and this behaviour defeats the purpose, so we only
 // consider SCCs of size larger than 1.
-func (graph *Graph) DoCycles(onComponent GraphWalkFunc) {
-	walker := &sccWalker{
-		graph:       graph,
-		info:        make(map[Vertex]*sccInfo),
-		onComponent: onComponent,
-		stack:       list.New(),
-	}
-	graph.DepthFirstWalk(walker)
-}
-
-// Cycles returns an iterator over the strongly connected components
-// of size larger than 1 found in the graph. Each yielded value is a
-// subgraph containing the vertices and edges of that SCC.
-func (graph *Graph) Cycles() iter.Seq[*Graph] {
-	return func(yield func(*Graph) bool) {
-		var sccs []*Graph
-		graph.DoCycles(func(scc *Graph) error {
-			sccs = append(sccs, scc)
-			return nil
-		})
-		for _, scc := range sccs {
-			if !yield(scc) {
-				return
-			}
+func (graph *Graph[V]) DoCycles(onComponent GraphWalkFunc[V]) {
+	for scc := range graph.Cycles() {
+		if err := onComponent(scc); err != nil {
+			return
 		}
 	}
 }

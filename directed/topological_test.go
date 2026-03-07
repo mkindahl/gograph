@@ -8,28 +8,28 @@ package directed
 import "testing"
 
 func TestTopologicalWalk(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(2, 3)
 	graph.AddEdge(3, 4)
 	time := 1
-	graph.DoTopological(func(vertex Vertex) error {
-		if vertex.(int) != time {
-			t.Errorf("Vertex %d processed at time %d\n", vertex.(int), time)
+	graph.DoTopological(func(vertex int) error {
+		if vertex != time {
+			t.Errorf("Vertex %d processed at time %d\n", vertex, time)
 		}
 		time++
 		return nil
 	})
 
-	graph = New()
+	graph = New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(1, 3)
 	graph.AddEdge(2, 4)
 	graph.AddEdge(3, 4)
 	when := new([5]int)
 	time = 1
-	graph.DoTopological(func(vertex Vertex) error {
-		when[time] = vertex.(int)
+	graph.DoTopological(func(vertex int) error {
+		when[time] = vertex
 		time++
 		return nil
 	})
@@ -39,21 +39,21 @@ func TestTopologicalWalk(t *testing.T) {
 }
 
 func TestTopologicalIterator(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(2, 3)
 	graph.AddEdge(3, 4)
 	time := 1
 	for v := range graph.Topological() {
-		if v.(int) != time {
-			t.Errorf("Vertex %d processed at time %d", v.(int), time)
+		if v != time {
+			t.Errorf("Vertex %d processed at time %d", v, time)
 		}
 		time++
 	}
 }
 
 func TestTopologicalIteratorDiamond(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(1, 3)
 	graph.AddEdge(2, 4)
@@ -61,7 +61,7 @@ func TestTopologicalIteratorDiamond(t *testing.T) {
 	when := make(map[int]int)
 	time := 1
 	for v := range graph.Topological() {
-		when[v.(int)] = time
+		when[v] = time
 		time++
 	}
 	if !(when[1] < when[2] && when[1] < when[3] && when[2] < when[4] && when[3] < when[4]) {
@@ -70,7 +70,7 @@ func TestTopologicalIteratorDiamond(t *testing.T) {
 }
 
 func TestTopologicalIteratorBreak(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(2, 3)
 	graph.AddEdge(3, 4)

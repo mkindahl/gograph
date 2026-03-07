@@ -11,15 +11,15 @@ import (
 )
 
 func TestAddVertex(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 
-	checkedAddVertex := func(vertex Vertex, expected bool, format string) {
+	checkedAddVertex := func(vertex int, expected bool, format string) {
 		if graph.AddVertex(vertex) != expected {
 			t.Errorf(format, vertex)
 		}
 	}
 
-	checkedHasVertex := func(vertex Vertex, expected bool, format string) {
+	checkedHasVertex := func(vertex int, expected bool, format string) {
 		if graph.HasVertex(vertex) != expected {
 			t.Errorf(format, vertex)
 		}
@@ -38,8 +38,8 @@ func TestAddVertex(t *testing.T) {
 	// Check that the iterator function process all vertices in
 	// the graph.
 	check := new([10]bool)
-	graph.DoVertices(func(vertex Vertex) error {
-		check[vertex.(int)] = true
+	graph.DoVertices(func(vertex int) error {
+		check[vertex] = true
 		return nil
 	})
 
@@ -52,7 +52,7 @@ func TestAddVertex(t *testing.T) {
 	// Check that the iterator function abort when an error is
 	// given and that it passes back the right error.
 	count := 0
-	err := graph.DoVertices(func(Vertex) error {
+	err := graph.DoVertices(func(int) error {
 		if count > 5 {
 			return errors.New("count > 5")
 		}
@@ -67,21 +67,21 @@ func TestAddVertex(t *testing.T) {
 }
 
 func TestAddEdge(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 
-	checkedAddEdge := func(x, y Vertex, expected bool, format string) {
+	checkedAddEdge := func(x, y int, expected bool, format string) {
 		if graph.AddEdge(x, y) != expected {
 			t.Errorf(format, x, y)
 		}
 	}
 
-	checkedHasEdge := func(x, y Vertex, expected bool, format string) {
+	checkedHasEdge := func(x, y int, expected bool, format string) {
 		if graph.HasEdge(x, y) != expected {
 			t.Errorf(format, x, y)
 		}
 	}
 
-	checkedHasVertex := func(vertex Vertex, expected bool, format string) {
+	checkedHasVertex := func(vertex int, expected bool, format string) {
 		if graph.HasVertex(vertex) != expected {
 			t.Errorf(format, vertex)
 		}
@@ -110,8 +110,8 @@ func TestAddEdge(t *testing.T) {
 	// Check that the edge iterator function processes all edges
 	// of the graph and only those.
 	check := new([10][20]bool)
-	graph.DoEdges(func(source, target Vertex) error {
-		check[source.(int)][target.(int)] = true
+	graph.DoEdges(func(source, target int) error {
+		check[source][target] = true
 		return nil
 	})
 	for i, js := range check {
@@ -124,15 +124,15 @@ func TestAddEdge(t *testing.T) {
 }
 
 func TestRemoveEdge(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 
-	checkedHasEdge := func(x, y Vertex, expected bool, format string) {
+	checkedHasEdge := func(x, y int, expected bool, format string) {
 		if graph.HasEdge(x, y) != expected {
 			t.Errorf(format, x, y)
 		}
 	}
 
-	checkedRemoveEdge := func(source, target Vertex) {
+	checkedRemoveEdge := func(source, target int) {
 		graph.RemoveEdge(source, target)
 		checkedHasEdge(source, target, false, "Edge (%d,%d) should not be there")
 	}
@@ -151,21 +151,21 @@ func TestRemoveEdge(t *testing.T) {
 }
 
 func TestRemoveVertex(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 
-	checkedHasVertex := func(vertex Vertex, expected bool, format string) {
+	checkedHasVertex := func(vertex int, expected bool, format string) {
 		if graph.HasVertex(vertex) != expected {
 			t.Errorf(format, vertex)
 		}
 	}
 
-	checkedHasEdge := func(x, y Vertex, expected bool, format string) {
+	checkedHasEdge := func(x, y int, expected bool, format string) {
 		if graph.HasEdge(x, y) != expected {
 			t.Errorf(format, x, y)
 		}
 	}
 
-	checkedRemoveVertex := func(vtx Vertex) {
+	checkedRemoveVertex := func(vtx int) {
 		graph.RemoveVertex(vtx)
 		checkedHasVertex(vtx, false, "Vertex %d should not be there")
 	}
@@ -184,7 +184,7 @@ func TestRemoveVertex(t *testing.T) {
 	checkedHasEdge(4, 1, false, "Edge (%d, %d) present")
 }
 
-func checkGraphCount(t *testing.T, graph *Graph, vertices_expected, edges_expected int) {
+func checkGraphCount(t *testing.T, graph *Graph[int], vertices_expected, edges_expected int) {
 	vertices := graph.Order()
 	if vertices_expected != vertices {
 		t.Errorf("Wrong number of vertices (was %d, expected %d)", vertices, vertices_expected)
@@ -197,7 +197,7 @@ func checkGraphCount(t *testing.T, graph *Graph, vertices_expected, edges_expect
 }
 
 func TestVertexEdgeCount(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	checkGraphCount(t, graph, 0, 0)
 	graph.AddVertex(1)
 	checkGraphCount(t, graph, 1, 0)
@@ -216,13 +216,13 @@ func TestVertexEdgeCount(t *testing.T) {
 }
 
 func TestVerticesIterator(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	for i := 0; i < 10; i++ {
 		graph.AddVertex(i)
 	}
 	seen := make(map[int]bool)
 	for v := range graph.Vertices() {
-		seen[v.(int)] = true
+		seen[v] = true
 	}
 	for i := 0; i < 10; i++ {
 		if !seen[i] {
@@ -235,7 +235,7 @@ func TestVerticesIterator(t *testing.T) {
 }
 
 func TestVerticesIteratorBreak(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	for i := 0; i < 10; i++ {
 		graph.AddVertex(i)
 	}
@@ -252,7 +252,7 @@ func TestVerticesIteratorBreak(t *testing.T) {
 }
 
 func TestEdgesIterator(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(1, 3)
 	graph.AddEdge(2, 3)
@@ -260,7 +260,7 @@ func TestEdgesIterator(t *testing.T) {
 	type edge struct{ src, tgt int }
 	seen := make(map[edge]bool)
 	for src, tgt := range graph.Edges() {
-		seen[edge{src.(int), tgt.(int)}] = true
+		seen[edge{src, tgt}] = true
 	}
 	expected := []edge{{1, 2}, {1, 3}, {2, 3}}
 	for _, e := range expected {
@@ -274,7 +274,7 @@ func TestEdgesIterator(t *testing.T) {
 }
 
 func TestEdgesIteratorBreak(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	for i := 0; i < 5; i++ {
 		graph.AddEdge(i, i+1)
 	}
@@ -291,7 +291,7 @@ func TestEdgesIteratorBreak(t *testing.T) {
 }
 
 func TestOutEdgesIterator(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(1, 3)
 	graph.AddEdge(1, 4)
@@ -299,7 +299,7 @@ func TestOutEdgesIterator(t *testing.T) {
 
 	targets := make(map[int]bool)
 	for _, tgt := range graph.OutEdges(1) {
-		targets[tgt.(int)] = true
+		targets[tgt] = true
 	}
 	for _, expected := range []int{2, 3, 4} {
 		if !targets[expected] {
@@ -312,7 +312,7 @@ func TestOutEdgesIterator(t *testing.T) {
 }
 
 func TestOutEdgesIteratorMissingVertex(t *testing.T) {
-	graph := New()
+	graph := New[int]()
 	graph.AddEdge(1, 2)
 	count := 0
 	for range graph.OutEdges(99) {
