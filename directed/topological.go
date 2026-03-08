@@ -24,14 +24,3 @@ func (graph *Graph[V]) Topological() iter.Seq[V] {
 		}
 	}
 }
-
-// DoTopological will process the graph in topological order and call
-// onDiscover with each step.
-func (graph *Graph[V]) DoTopological(onDiscover VertexWalkFunc[V]) error {
-	for v := range graph.Topological() {
-		if err := onDiscover(v); err != nil {
-			return err
-		}
-	}
-	return nil
-}

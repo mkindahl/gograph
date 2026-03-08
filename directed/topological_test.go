@@ -13,13 +13,12 @@ func TestTopologicalWalk(t *testing.T) {
 	graph.AddEdge(2, 3)
 	graph.AddEdge(3, 4)
 	time := 1
-	graph.DoTopological(func(vertex int) error {
-		if vertex != time {
-			t.Errorf("Vertex %d processed at time %d\n", vertex, time)
+	for v := range graph.Topological() {
+		if v != time {
+			t.Errorf("Vertex %d processed at time %d\n", v, time)
 		}
 		time++
-		return nil
-	})
+	}
 
 	graph = New[int]()
 	graph.AddEdge(1, 2)
@@ -28,11 +27,10 @@ func TestTopologicalWalk(t *testing.T) {
 	graph.AddEdge(3, 4)
 	when := new([5]int)
 	time = 1
-	graph.DoTopological(func(vertex int) error {
-		when[time] = vertex
+	for v := range graph.Topological() {
+		when[time] = v
 		time++
-		return nil
-	})
+	}
 	if !(when[1] < when[2] && when[1] < when[3] && when[2] < when[4] && when[3] < when[4]) {
 		t.Errorf("Not in topological order %v\n", when)
 	}

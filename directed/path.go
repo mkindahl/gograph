@@ -5,10 +5,7 @@
 
 package directed
 
-import (
-	"container/list"
-	"errors"
-)
+import "errors"
 
 // ShortestPath finds the shortest path between two vertices, returning
 // a slice of vertices from start to stop. Returns an error if no path
@@ -42,20 +39,4 @@ func (graph *Graph[V]) ShortestPath(start, stop V) ([]V, error) {
 		}
 		last = next
 	}
-}
-
-// FindShortestPath finds the shortest path between two vertices. The list
-// returned will be either nil if no path was found (in which case, error
-// will be set) or a list of vertices starting with start and ending with
-// stop. This is implemented using BFS and has complexity O(|E|).
-func (graph *Graph[V]) FindShortestPath(start, stop V) (*list.List, error) {
-	path, err := graph.ShortestPath(start, stop)
-	if err != nil {
-		return nil, err
-	}
-	result := list.New()
-	for _, v := range path {
-		result.PushBack(v)
-	}
-	return result, nil
 }

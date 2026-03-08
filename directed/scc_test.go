@@ -9,17 +9,16 @@ import "testing"
 
 func checkCycleCount(t *testing.T, graph *Graph[int], expected int) {
 	count := 0
-	graph.DoCycles(func(graph *Graph[int]) error {
+	for range graph.Cycles() {
 		count++
-		return nil
-	})
+	}
 	if count != expected {
 		t.Errorf("Wrong number of components (was %v, should be %v)", count, expected)
 	}
 }
 
 func checkCycle(t *testing.T, graph *Graph[int], vertices, edges int, check func(graph *Graph[int]) bool) {
-	graph.DoCycles(func(subg *Graph[int]) error {
+	for subg := range graph.Cycles() {
 		if vs := subg.Order(); vs != vertices {
 			t.Errorf("Wrong number of vertices (was %d, expected %d)", vs, vertices)
 		}
@@ -30,8 +29,7 @@ func checkCycle(t *testing.T, graph *Graph[int], vertices, edges int, check func
 		if !check(graph) {
 			t.Errorf("Missing edges")
 		}
-		return nil
-	})
+	}
 }
 
 func TestCycleWalkCount(t *testing.T) {

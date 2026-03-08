@@ -12,13 +12,12 @@ import (
 	"iter"
 )
 
-type adjacencyList[V comparable] map[V]*list.List
-
 // Graph is the respresentation of a directed graph. It contain all
 // the edges and vertices of the graph.
 type Graph[V comparable] struct {
-	edges                  adjacencyList[V]
-	edgeCount, vertexCount int
+	edges       map[V]*list.List
+	edgeCount   int
+	vertexCount int
 }
 
 // find is used to locate an element in a list by value. It will
@@ -40,7 +39,7 @@ func find[V comparable](lst *list.List, value V) (bool, *list.Element) {
 
 // New will create a new, empty, directed graph.
 func New[V comparable]() *Graph[V] {
-	return &Graph[V]{edges: make(adjacencyList[V])}
+	return &Graph[V]{edges: make(map[V]*list.List)}
 }
 
 // AddEdge add an edge to the graph. The source and target vertices
@@ -141,52 +140,6 @@ func (graph *Graph[V]) Order() int {
 // the graph.
 func (graph *Graph[V]) Size() int {
 	return graph.edgeCount
-}
-
-// VertexWalkFunc is a function called when walking vertices of a
-// graph.
-type VertexWalkFunc[V comparable] func(vertex V) error
-
-// DoVertices iterate over all the vertices of the graph calling
-// 'walkFn' with each vertex. If the walk function returns an error,
-// iteration will be aborted and the error returned to the caller.
-func (graph *Graph[V]) DoVertices(walkFn VertexWalkFunc[V]) error {
-	for vertex := range graph.Vertices() {
-		if err := walkFn(vertex); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// EdgeWalkFunc is a function called when walking edges of a graph.
-type EdgeWalkFunc[V comparable] func(source, target V) error
-
-// DoEdges will iterate over all the edges of the graph calling
-// 'walkFn' with the source and target vertex of the edge. If the walk
-// function return an error, iteration will be aborted and the error
-// returned.
-func (graph *Graph[V]) DoEdges(walkFn EdgeWalkFunc[V]) error {
-	for source, target := range graph.Edges() {
-		if err := walkFn(source, target); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// DoOutEdges iterate over the out-edges of a vertex, calling 'walkFn'
-// with the source and the target vertex of the edge.  The source
-// target will be 'vertex' in each case, but edge walk functions use
-// this common format. If the walk function return an error, iteration
-// will be aborted and the error returned.
-func (graph *Graph[V]) DoOutEdges(vertex V, walkFn EdgeWalkFunc[V]) error {
-	for source, target := range graph.OutEdges(vertex) {
-		if err := walkFn(source, target); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 // Vertices returns an iterator over all vertices in the graph.

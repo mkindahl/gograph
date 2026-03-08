@@ -11,14 +11,19 @@ type sccInfo struct {
 	number, low int
 }
 
-// GraphWalkFunc is a function called on subgraphs of a graph, for
-// example, when iterating over the strongly connected components of a
-// graph.
-type GraphWalkFunc[V comparable] func(graph *Graph[V]) error
-
 // Cycles returns an iterator over the strongly connected components
 // of size larger than 1 found in the graph. Each yielded value is a
 // subgraph containing the vertices and edges of that SCC.
+//
+// The reason that only components of size > 1 is picked is that
+// Tarjan's algorithm considers nodes that are not part of a SCC of
+// size larger than 1 an SCC in itself. This would mean that the
+// function is called for all nodes of the graph if it is, for
+// example, a DAG (directed acyclic graph).
+//
+// The intention is normally to use the algorithm to find cycles in
+// the graph, and this behaviour defeats the purpose, so we only
+// consider SCCs of size larger than 1.
 func (graph *Graph[V]) Cycles() iter.Seq[*Graph[V]] {
 	return func(yield func(*Graph[V]) bool) {
 		info := make(map[V]*sccInfo)
@@ -85,26 +90,6 @@ func (graph *Graph[V]) Cycles() iter.Seq[*Graph[V]] {
 					}
 				}
 			}
-		}
-	}
-}
-
-// DoCycles will call the onComponent function for each SCC (strongly
-// connected component) of size larger than 1 found in the graph.
-//
-// The reason that only components of size > 1 is picked is that
-// Tarjan's algorithm considers nodes that are not part of a SCC of
-// size larger than 1 an SCC in itself. This would mean that the
-// function is called for all nodes of the graph if it is, for
-// example, a DAG (directed acyclic graph).
-//
-// The intention is normally to use the algorithm to find cycles in
-// the graph, and this behaviour defeats the purpose, so we only
-// consider SCCs of size larger than 1.
-func (graph *Graph[V]) DoCycles(onComponent GraphWalkFunc[V]) {
-	for scc := range graph.Cycles() {
-		if err := onComponent(scc); err != nil {
-			return
 		}
 	}
 }
