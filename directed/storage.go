@@ -9,6 +9,7 @@ package directed
 
 import (
 	"container/list"
+	"fmt"
 	"iter"
 )
 
@@ -45,38 +46,39 @@ func New[V comparable]() *Digraph[V] {
 	return &Digraph[V]{edges: make(map[V]*list.List)}
 }
 
-// AddEdge add an edge to the graph. The source and target vertices
-// will be added to the graph if they are not already present. The
-// function return 'true' if the edge was successfully added, and
-// 'false' if the edge already existed.
-func (graph *Digraph[V]) AddEdge(source, target V) bool {
-	graph.AddVertex(source)
-	graph.AddVertex(target)
-	lst := graph.edges[source]
-	found, elem := find(lst, target)
-	if !found {
+// AddEdges adds edges to the graph. The source and target vertices
+// will be added to the graph if they are not already present. Returns
+// an error if any edge already exists.
+func (graph *Digraph[V]) AddEdges(edges ...Edge[V]) error {
+	for _, edge := range edges {
+		graph.AddVertex(edge[0])
+		graph.AddVertex(edge[1])
+		lst := graph.edges[edge[0]]
+		found, elem := find(lst, edge[1])
+		if found {
+			return fmt.Errorf("edge (%v, %v) already exists", edge[0], edge[1])
+		}
 		if elem != nil {
-			lst.InsertAfter(target, elem)
+			lst.InsertAfter(edge[1], elem)
 		} else {
-			lst.PushBack(target)
+			lst.PushBack(edge[1])
 		}
 		graph.edgeCount++
 	}
-	return !found
+	return nil
 }
 
 // RemoveEdge will remove and edge from the graph. The vertices that
 // serve as endpoints for the edge will not be removed.  The method
-// returns 'true' if the edge was successfully removed, 'false'
-// otherwise.
-func (graph *Digraph[V]) RemoveEdge(source, target V) bool {
+// Returns an error if the edge does not exist.
+func (graph *Digraph[V]) RemoveEdge(source, target V) error {
 	lst := graph.edges[source]
 	if found, elem := find(lst, target); found {
 		lst.Remove(elem)
 		graph.edgeCount--
-		return true
+		return nil
 	}
-	return false
+	return fmt.Errorf("edge (%v, %v) does not exist", source, target)
 }
 
 // AddVertex will add a vertex to the graph. The vertex will have no

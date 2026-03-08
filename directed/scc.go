@@ -80,7 +80,7 @@ func (graph *Digraph[V]) Cycles() iter.Seq[*Digraph[V]] {
 						for vtx := range scc.Vertices() {
 							for _, target := range graph.OutEdges(vtx) {
 								if scc.HasVertex(target) {
-									scc.AddEdge(vtx, target)
+									scc.AddEdges(Edge[V]{vtx, target})
 								}
 							}
 						}

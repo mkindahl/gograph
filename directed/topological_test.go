@@ -9,9 +9,7 @@ import "testing"
 
 func TestTopologicalWalk(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
-	graph.AddEdge(3, 4)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 4})
 	time := 1
 	for v := range graph.Topological() {
 		if v != time {
@@ -21,10 +19,7 @@ func TestTopologicalWalk(t *testing.T) {
 	}
 
 	graph = New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(1, 3)
-	graph.AddEdge(2, 4)
-	graph.AddEdge(3, 4)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{1, 3}, Edge[int]{2, 4}, Edge[int]{3, 4})
 	when := new([5]int)
 	time = 1
 	for v := range graph.Topological() {
@@ -38,9 +33,7 @@ func TestTopologicalWalk(t *testing.T) {
 
 func TestTopologicalIterator(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
-	graph.AddEdge(3, 4)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 4})
 	time := 1
 	for v := range graph.Topological() {
 		if v != time {
@@ -52,10 +45,7 @@ func TestTopologicalIterator(t *testing.T) {
 
 func TestTopologicalIteratorDiamond(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(1, 3)
-	graph.AddEdge(2, 4)
-	graph.AddEdge(3, 4)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{1, 3}, Edge[int]{2, 4}, Edge[int]{3, 4})
 	when := make(map[int]int)
 	time := 1
 	for v := range graph.Topological() {
@@ -69,9 +59,7 @@ func TestTopologicalIteratorDiamond(t *testing.T) {
 
 func TestTopologicalIteratorBreak(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
-	graph.AddEdge(3, 4)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 4})
 	count := 0
 	for range graph.Topological() {
 		count++

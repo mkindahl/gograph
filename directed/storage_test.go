@@ -64,8 +64,9 @@ func TestAddVertex(t *testing.T) {
 func TestAddEdge(t *testing.T) {
 	graph := New[int]()
 
-	checkedAddEdge := func(x, y int, expected bool, format string) {
-		if graph.AddEdge(x, y) != expected {
+	checkedAddEdge := func(x, y int, expectErr bool, format string) {
+		err := graph.AddEdges(Edge[int]{x, y})
+		if (err != nil) != expectErr {
 			t.Errorf(format, x, y)
 		}
 	}
@@ -84,8 +85,8 @@ func TestAddEdge(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		for j := 10; j < 20; j++ {
-			checkedAddEdge(i, j, true, "Edge (%v,%v) cannot be added")
-			checkedAddEdge(i, j, false, "Duplicate edge (%v,%v) can be added")
+			checkedAddEdge(i, j, false, "Edge (%v,%v) cannot be added")
+			checkedAddEdge(i, j, true, "Duplicate edge (%v,%v) can be added")
 		}
 	}
 
@@ -131,11 +132,13 @@ func TestRemoveEdge(t *testing.T) {
 		checkedAdjacent(source, target, false, "Edge (%d,%d) should not be there")
 	}
 
-	graph.AddEdge(1, 2)
-	graph.AddEdge(1, 3)
-	graph.AddEdge(3, 4)
-	graph.AddEdge(2, 4)
-	graph.AddEdge(4, 1)
+	graph.AddEdges(
+		Edge[int]{1, 2},
+		Edge[int]{1, 3},
+		Edge[int]{3, 4},
+		Edge[int]{2, 4},
+		Edge[int]{4, 1},
+	)
 
 	checkedRemoveEdge(4, 1)
 	checkedAdjacent(1, 2, true, "Edge (%d, %d) missing")
@@ -153,9 +156,13 @@ func TestRemoveVertex(t *testing.T) {
 		}
 	}
 
-	checkedAdjacent := func(x, y int, expected bool, format string) {
-		if graph.Adjacent(x, y) != expected {
-			t.Errorf(format, x, y)
+	checkedAdjacent := func(edge Edge[int], expected bool) {
+		if graph.Adjacent(edge[0], edge[1]) != expected {
+			if expected {
+				t.Errorf("Edge %v missing", edge)
+			} else {
+				t.Errorf("Edge %v present", edge)
+			}
 		}
 	}
 
@@ -164,18 +171,20 @@ func TestRemoveVertex(t *testing.T) {
 		checkedHasVertex(vtx, false, "Vertex %d should not be there")
 	}
 
-	graph.AddEdge(1, 2)
-	graph.AddEdge(1, 3)
-	graph.AddEdge(3, 4)
-	graph.AddEdge(2, 4)
-	graph.AddEdge(4, 1)
+	graph.AddEdges(
+		Edge[int]{1, 2},
+		Edge[int]{1, 3},
+		Edge[int]{3, 4},
+		Edge[int]{2, 4},
+		Edge[int]{4, 1},
+	)
 
 	checkedRemoveVertex(4)
-	checkedAdjacent(1, 2, true, "Edge (%d, %d) missing")
-	checkedAdjacent(1, 3, true, "Edge (%d, %d) missing")
-	checkedAdjacent(3, 4, false, "Edge (%d, %d) present")
-	checkedAdjacent(2, 4, false, "Edge (%d, %d) present")
-	checkedAdjacent(4, 1, false, "Edge (%d, %d) present")
+	checkedAdjacent(Edge[int]{1, 2}, true)
+	checkedAdjacent(Edge[int]{1, 3}, true)
+	checkedAdjacent(Edge[int]{3, 4}, false)
+	checkedAdjacent(Edge[int]{2, 4}, false)
+	checkedAdjacent(Edge[int]{4, 1}, false)
 }
 
 func checkGraphCount(t *testing.T, graph *Digraph[int], vertices_expected, edges_expected int) {
@@ -195,15 +204,13 @@ func TestVertexEdgeCount(t *testing.T) {
 	checkGraphCount(t, graph, 0, 0)
 	graph.AddVertex(1)
 	checkGraphCount(t, graph, 1, 0)
-	graph.AddEdge(1, 2)
+	graph.AddEdges(Edge[int]{1, 2})
 	checkGraphCount(t, graph, 2, 1)
-	graph.AddEdge(1, 3)
-	graph.AddEdge(1, 4)
-	graph.AddEdge(1, 5)
+	graph.AddEdges(Edge[int]{1, 3}, Edge[int]{1, 4}, Edge[int]{1, 5})
 	checkGraphCount(t, graph, 5, 4)
 	graph.RemoveVertex(1)
 	checkGraphCount(t, graph, 4, 0)
-	graph.AddEdge(2, 3)
+	graph.AddEdges(Edge[int]{2, 3})
 	checkGraphCount(t, graph, 4, 1)
 	graph.RemoveVertex(3)
 	checkGraphCount(t, graph, 3, 0)
@@ -247,9 +254,7 @@ func TestVerticesIteratorBreak(t *testing.T) {
 
 func TestEdgesIterator(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(1, 3)
-	graph.AddEdge(2, 3)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{1, 3}, Edge[int]{2, 3})
 
 	type edge struct{ src, tgt int }
 	seen := make(map[edge]bool)
@@ -270,7 +275,7 @@ func TestEdgesIterator(t *testing.T) {
 func TestEdgesIteratorBreak(t *testing.T) {
 	graph := New[int]()
 	for i := 0; i < 5; i++ {
-		graph.AddEdge(i, i+1)
+		graph.AddEdges(Edge[int]{i, i + 1})
 	}
 	count := 0
 	for range graph.Edges() {
@@ -286,10 +291,12 @@ func TestEdgesIteratorBreak(t *testing.T) {
 
 func TestOutEdgesIterator(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(1, 3)
-	graph.AddEdge(1, 4)
-	graph.AddEdge(2, 5)
+	graph.AddEdges(
+		Edge[int]{1, 2},
+		Edge[int]{1, 3},
+		Edge[int]{1, 4},
+		Edge[int]{2, 5},
+	)
 
 	targets := make(map[int]bool)
 	for _, tgt := range graph.OutEdges(1) {
@@ -307,7 +314,7 @@ func TestOutEdgesIterator(t *testing.T) {
 
 func TestOutEdgesIteratorMissingVertex(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
+	graph.AddEdges(Edge[int]{1, 2})
 	count := 0
 	for range graph.OutEdges(99) {
 		count++
@@ -319,7 +326,7 @@ func TestOutEdgesIteratorMissingVertex(t *testing.T) {
 
 func TestAddVertexAbortOnError(t *testing.T) {
 	graph := New[int]()
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		graph.AddVertex(i)
 	}
 	count := 0

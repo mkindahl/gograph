@@ -44,14 +44,16 @@ func prettyMap(input map[int]*Info) string {
 // Cormen et.al.
 func TestDepthFirstWalk(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(1, 4)
-	graph.AddEdge(2, 5)
-	graph.AddEdge(3, 5)
-	graph.AddEdge(3, 6)
-	graph.AddEdge(4, 2)
-	graph.AddEdge(5, 4)
-	graph.AddEdge(6, 6)
+	graph.AddEdges(
+		Edge[int]{1, 2},
+		Edge[int]{1, 4},
+		Edge[int]{2, 5},
+		Edge[int]{3, 5},
+		Edge[int]{3, 6},
+		Edge[int]{4, 2},
+		Edge[int]{5, 4},
+		Edge[int]{6, 6},
+	)
 
 	info := make(map[int]*Info)
 	time := 1
@@ -84,8 +86,7 @@ func TestDepthFirstWalk(t *testing.T) {
 // circular graphs.
 func TestCircularGraph(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 1)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 1})
 	visited := make(map[int]int)
 	for event := range graph.DepthFirst() {
 		if event.Kind == Discover {
@@ -100,8 +101,7 @@ func TestCircularGraph(t *testing.T) {
 
 func TestDepthFirstIterator(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3})
 
 	discovered := make(map[int]bool)
 	finished := make(map[int]bool)
@@ -125,9 +125,7 @@ func TestDepthFirstIterator(t *testing.T) {
 
 func TestDepthFirstIteratorBackEdge(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
-	graph.AddEdge(3, 1)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 1})
 
 	hasBackEdge := false
 	for event := range graph.DepthFirst() {
@@ -142,9 +140,7 @@ func TestDepthFirstIteratorBackEdge(t *testing.T) {
 
 func TestDepthFirstIteratorBreak(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
-	graph.AddEdge(3, 4)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 4})
 	count := 0
 	for range graph.DepthFirst() {
 		count++

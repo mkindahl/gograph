@@ -9,13 +9,15 @@ import "testing"
 
 func TestShortestPathSlice(t *testing.T) {
 	graph := New[string]()
-	graph.AddEdge("a", "b")
-	graph.AddEdge("a", "c")
-	graph.AddEdge("b", "d")
-	graph.AddEdge("b", "e")
-	graph.AddEdge("e", "h")
-	graph.AddEdge("c", "f")
-	graph.AddEdge("c", "g")
+	graph.AddEdges(
+		Edge[string]{"a", "b"},
+		Edge[string]{"a", "c"},
+		Edge[string]{"b", "d"},
+		Edge[string]{"b", "e"},
+		Edge[string]{"e", "h"},
+		Edge[string]{"c", "f"},
+		Edge[string]{"c", "g"},
+	)
 
 	path, err := graph.ShortestPath("a", "h")
 	if err != nil {
@@ -34,8 +36,7 @@ func TestShortestPathSlice(t *testing.T) {
 
 func TestShortestPathSliceNoPath(t *testing.T) {
 	graph := New[string]()
-	graph.AddEdge("a", "b")
-	graph.AddEdge("c", "d")
+	graph.AddEdges(Edge[string]{"a", "b"}, Edge[string]{"c", "d"})
 
 	_, err := graph.ShortestPath("a", "d")
 	if err == nil {

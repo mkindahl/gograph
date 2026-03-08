@@ -34,41 +34,32 @@ func checkCycle(t *testing.T, graph *Digraph[int], vertices, edges int, check fu
 
 func TestCycleWalkCount(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 1)
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
+	graph.AddEdges(Edge[int]{1, 1}, Edge[int]{1, 2}, Edge[int]{2, 3})
 	checkCycleCount(t, graph, 0)
-	graph.AddEdge(3, 1)
+	graph.AddEdges(Edge[int]{3, 1})
 	checkCycleCount(t, graph, 1)
 	checkCycle(t, graph, 3, 4, func(graph *Digraph[int]) bool {
 		return graph.Adjacent(1, 2) && graph.Adjacent(2, 3) && graph.Adjacent(3, 1)
 	})
-	graph.AddEdge(1, 4)
-	graph.AddEdge(2, 5)
-	graph.AddEdge(3, 6)
-	graph.AddEdge(6, 7)
+	graph.AddEdges(Edge[int]{1, 4}, Edge[int]{2, 5}, Edge[int]{3, 6}, Edge[int]{6, 7})
 	checkCycleCount(t, graph, 1)
 	checkCycle(t, graph, 3, 4, func(graph *Digraph[int]) bool {
 		return graph.Adjacent(1, 2) && graph.Adjacent(2, 3) && graph.Adjacent(3, 1)
 	})
-	graph.AddEdge(4, 1)
+	graph.AddEdges(Edge[int]{4, 1})
 	checkCycleCount(t, graph, 1)
 	checkCycle(t, graph, 4, 6, func(graph *Digraph[int]) bool {
 		return graph.Adjacent(1, 2) && graph.Adjacent(2, 3) &&
 			graph.Adjacent(3, 1) && graph.Adjacent(1, 4) &&
 			graph.Adjacent(4, 1)
 	})
-	graph.AddEdge(7, 6)
+	graph.AddEdges(Edge[int]{7, 6})
 	checkCycleCount(t, graph, 2)
 }
 
 func TestCyclesIterator(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
-	graph.AddEdge(3, 1)
-	graph.AddEdge(6, 7)
-	graph.AddEdge(7, 6)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 1}, Edge[int]{6, 7}, Edge[int]{7, 6})
 	count := 0
 	for range graph.Cycles() {
 		count++
@@ -80,8 +71,7 @@ func TestCyclesIterator(t *testing.T) {
 
 func TestCyclesIteratorNoCycles(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3})
 	count := 0
 	for range graph.Cycles() {
 		count++
@@ -93,11 +83,7 @@ func TestCyclesIteratorNoCycles(t *testing.T) {
 
 func TestCyclesIteratorBreak(t *testing.T) {
 	graph := New[int]()
-	graph.AddEdge(1, 2)
-	graph.AddEdge(2, 3)
-	graph.AddEdge(3, 1)
-	graph.AddEdge(6, 7)
-	graph.AddEdge(7, 6)
+	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 1}, Edge[int]{6, 7}, Edge[int]{7, 6})
 	count := 0
 	for range graph.Cycles() {
 		count++

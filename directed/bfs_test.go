@@ -16,15 +16,16 @@ func TestNonCyclicBreadthFirstWalk(t *testing.T) {
 	// http://en.wikipedia.org/wiki/File:Animated_BFS.gif
 	// two extra nodes (1 and 2) are added that are not connected to the rest of
 	// the graph
-	graph.AddEdge("a", "b")
-	graph.AddEdge("a", "c")
-	graph.AddEdge("b", "d")
-	graph.AddEdge("b", "e")
-	graph.AddEdge("e", "h")
-	graph.AddEdge("c", "f")
-	graph.AddEdge("c", "g")
-
-	graph.AddEdge("1", "2")
+	graph.AddEdges(
+		Edge[string]{"a", "b"},
+		Edge[string]{"a", "c"},
+		Edge[string]{"b", "d"},
+		Edge[string]{"b", "e"},
+		Edge[string]{"e", "h"},
+		Edge[string]{"c", "f"},
+		Edge[string]{"c", "g"},
+		Edge[string]{"1", "2"},
+	)
 
 	info := make(map[string]int)
 	fin := 0
@@ -101,14 +102,16 @@ func TestCyclicBreadthFirstWalk(t *testing.T) {
 	// a visualization can be found here:
 	// http://en.wikipedia.org/wiki/File:Animated_BFS.gif
 	// with the exception that node "h" is connected to node "a"
-	graph.AddEdge("a", "b")
-	graph.AddEdge("a", "c")
-	graph.AddEdge("b", "d")
-	graph.AddEdge("b", "e")
-	graph.AddEdge("e", "h")
-	graph.AddEdge("c", "f")
-	graph.AddEdge("c", "g")
-	graph.AddEdge("h", "a")
+	graph.AddEdges(
+		Edge[string]{"a", "b"},
+		Edge[string]{"a", "c"},
+		Edge[string]{"b", "d"},
+		Edge[string]{"b", "e"},
+		Edge[string]{"e", "h"},
+		Edge[string]{"c", "f"},
+		Edge[string]{"c", "g"},
+		Edge[string]{"h", "a"},
+	)
 
 	info := make(map[string]int)
 	fin := 0
@@ -120,13 +123,6 @@ func TestCyclicBreadthFirstWalk(t *testing.T) {
 		}
 	}
 
-	// a < b
-	// a < c
-	// b < d
-	// b < e
-	// c < f
-	// c < g
-	// d, e, f, g < h
 	t.Logf("Ordering: %v\n", info)
 	if info["a"] >= info["b"] {
 		t.Fatalf("Incorrect ordering")
@@ -173,21 +169,17 @@ func TestCyclicBreadthFirstWalk(t *testing.T) {
 func TestBreadthFirstWalk(t *testing.T) {
 	graph := New[string]()
 
-	// this is the graph that wikipedia uses as an example for BFS
-	// a visualization can be found here:
-	// http://en.wikipedia.org/wiki/File:Animated_BFS.gif
-	// with the exception that node "h" is connected to node "a"
-	// and there is a non-connected segment containing two nodes, "1" and "2"
-	graph.AddEdge("a", "b")
-	graph.AddEdge("a", "c")
-	graph.AddEdge("b", "d")
-	graph.AddEdge("b", "e")
-	graph.AddEdge("e", "h")
-	graph.AddEdge("c", "f")
-	graph.AddEdge("c", "g")
-	graph.AddEdge("h", "a")
-
-	graph.AddEdge("1", "2")
+	graph.AddEdges(
+		Edge[string]{"a", "b"},
+		Edge[string]{"a", "c"},
+		Edge[string]{"b", "d"},
+		Edge[string]{"b", "e"},
+		Edge[string]{"e", "h"},
+		Edge[string]{"c", "f"},
+		Edge[string]{"c", "g"},
+		Edge[string]{"h", "a"},
+		Edge[string]{"1", "2"},
+	)
 
 	info := make(map[string]int)
 	fin := 0
@@ -208,10 +200,12 @@ func TestBreadthFirstWalk(t *testing.T) {
 
 func TestBreadthFirstIterator(t *testing.T) {
 	graph := New[string]()
-	graph.AddEdge("a", "b")
-	graph.AddEdge("a", "c")
-	graph.AddEdge("b", "d")
-	graph.AddEdge("1", "2")
+	graph.AddEdges(
+		Edge[string]{"a", "b"},
+		Edge[string]{"a", "c"},
+		Edge[string]{"b", "d"},
+		Edge[string]{"1", "2"},
+	)
 
 	discovered := make(map[string]bool)
 	finished := make(map[string]bool)
@@ -235,10 +229,12 @@ func TestBreadthFirstIterator(t *testing.T) {
 
 func TestBreadthFirstFromIterator(t *testing.T) {
 	graph := New[string]()
-	graph.AddEdge("a", "b")
-	graph.AddEdge("a", "c")
-	graph.AddEdge("b", "d")
-	graph.AddEdge("1", "2")
+	graph.AddEdges(
+		Edge[string]{"a", "b"},
+		Edge[string]{"a", "c"},
+		Edge[string]{"b", "d"},
+		Edge[string]{"1", "2"},
+	)
 
 	discovered := make(map[string]bool)
 	for event := range graph.BreadthFirstFrom("a") {
@@ -258,9 +254,7 @@ func TestBreadthFirstFromIterator(t *testing.T) {
 
 func TestBreadthFirstFromIteratorBreak(t *testing.T) {
 	graph := New[string]()
-	graph.AddEdge("a", "b")
-	graph.AddEdge("b", "c")
-	graph.AddEdge("c", "d")
+	graph.AddEdges(Edge[string]{"a", "b"}, Edge[string]{"b", "c"}, Edge[string]{"c", "d"})
 	count := 0
 	for range graph.BreadthFirstFrom("a") {
 		count++
