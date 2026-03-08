@@ -55,33 +55,29 @@ func TestDepthFirstWalk(t *testing.T) {
 
 	info := make(map[int]*Info)
 	time := 1
-	onDiscover := func(vertex int) error {
-		if info[vertex] == nil {
-			info[vertex] = new(Info)
+	for event := range graph.DepthFirst() {
+		switch event.Kind {
+		case Discover:
+			if info[event.Vertex] == nil {
+				info[event.Vertex] = new(Info)
+			}
+			info[event.Vertex].discover = time
+			time++
+		case Finish:
+			if info[event.Vertex] == nil {
+				info[event.Vertex] = new(Info)
+			}
+			info[event.Vertex].finish = time
+			time++
 		}
-		info[vertex].discover = time
-		time++
-		return nil
 	}
-	onFinish := func(vertex int) error {
-		if info[vertex] == nil {
-			info[vertex] = new(Info)
-		}
-		info[vertex].finish = time
-		time++
-		return nil
-	}
-	graph.DoDepthFirst(onDiscover, onFinish)
 
-	printEdge := func(source, target int) error {
+	for source, target := range graph.Edges() {
 		if source != target && !isValidNesting(info[source], info[target]) {
 			pretty := prettyMap(info)
 			t.Errorf("Edge %v -> %v has bad finish time (%s)\n", source, target, pretty)
 		}
-		return nil
 	}
-
-	graph.DoEdges(printEdge)
 }
 
 // TestCircularGraph tests that the depth first walk stops also for
@@ -90,15 +86,16 @@ func TestCircularGraph(t *testing.T) {
 	graph := New[int]()
 	graph.AddEdge(1, 2)
 	graph.AddEdge(2, 1)
-	info := make(map[int]int)
-	graph.DoDepthFirst(func(vertex int) error {
-		if info[vertex] == 0 {
-			info[vertex] = 1
-		} else {
-			t.Errorf("Edge already visited!")
+	visited := make(map[int]int)
+	for event := range graph.DepthFirst() {
+		if event.Kind == Discover {
+			if visited[event.Vertex] == 0 {
+				visited[event.Vertex] = 1
+			} else {
+				t.Errorf("Edge already visited!")
+			}
 		}
-		return nil
-	}, nil)
+	}
 }
 
 func TestDepthFirstIterator(t *testing.T) {

@@ -29,17 +29,12 @@ func TestNonCyclicBreadthFirstWalk(t *testing.T) {
 	info := make(map[string]int)
 	fin := 0
 
-	onDiscover := func(vertex string) error {
-		return nil
+	for event := range graph.BreadthFirstFrom("a") {
+		if event.Kind == Finish {
+			info[event.Vertex] = fin
+			fin++
+		}
 	}
-
-	onFinish := func(vertex string) error {
-		info[vertex] = fin
-		fin++
-		return nil
-	}
-
-	graph.DoBreadthFirstWalkFromVertex("a", onDiscover, onFinish)
 
 	// a < b
 	// a < c
@@ -118,17 +113,12 @@ func TestCyclicBreadthFirstWalk(t *testing.T) {
 	info := make(map[string]int)
 	fin := 0
 
-	onDiscover := func(vertex string) error {
-		return nil
+	for event := range graph.BreadthFirstFrom("a") {
+		if event.Kind == Finish {
+			info[event.Vertex] = fin
+			fin++
+		}
 	}
-
-	onFinish := func(vertex string) error {
-		info[vertex] = fin
-		fin++
-		return nil
-	}
-
-	graph.DoBreadthFirstWalkFromVertex("a", onDiscover, onFinish)
 
 	// a < b
 	// a < c
@@ -202,17 +192,12 @@ func TestBreadthFirstWalk(t *testing.T) {
 	info := make(map[string]int)
 	fin := 0
 
-	onDiscover := func(vertex string) error {
-		return nil
+	for event := range graph.BreadthFirst() {
+		if event.Kind == Finish {
+			info[event.Vertex] = fin
+			fin++
+		}
 	}
-
-	onFinish := func(vertex string) error {
-		info[vertex] = fin
-		fin++
-		return nil
-	}
-
-	graph.DoBreadthFirstWalk(onDiscover, onFinish)
 
 	for _, v := range []string{"a", "b", "c", "d", "e", "f", "g", "h", "1", "2"} {
 		if _, ok := info[v]; !ok {
