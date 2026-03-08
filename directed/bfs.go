@@ -15,7 +15,7 @@ type bfsEntry[V comparable] struct {
 // BreadthFirstFrom returns an iterator that yields TraversalEvent
 // values for a breadth-first traversal starting from the given vertex.
 // Only vertices reachable from the start vertex will be visited.
-func (graph *Graph[V]) BreadthFirstFrom(vertex V) iter.Seq[TraversalEvent[V]] {
+func (graph *Digraph[V]) BreadthFirstFrom(vertex V) iter.Seq[TraversalEvent[V]] {
 	return func(yield func(TraversalEvent[V]) bool) {
 		seen := make(map[V]uint8)
 		graph.bfsIter(yield, seen, vertex)
@@ -24,7 +24,7 @@ func (graph *Graph[V]) BreadthFirstFrom(vertex V) iter.Seq[TraversalEvent[V]] {
 
 // BreadthFirst returns an iterator that yields TraversalEvent values
 // for a breadth-first traversal of the entire graph.
-func (graph *Graph[V]) BreadthFirst() iter.Seq[TraversalEvent[V]] {
+func (graph *Digraph[V]) BreadthFirst() iter.Seq[TraversalEvent[V]] {
 	return func(yield func(TraversalEvent[V]) bool) {
 		seen := make(map[V]uint8)
 		for vertex := range graph.edges {
@@ -40,7 +40,7 @@ func (graph *Graph[V]) BreadthFirst() iter.Seq[TraversalEvent[V]] {
 
 // bfsIter performs a BFS from a single vertex, yielding events via
 // yield. Returns false if yield requested stop.
-func (graph *Graph[V]) bfsIter(yield func(TraversalEvent[V]) bool, seen map[V]uint8, vertex V) bool {
+func (graph *Digraph[V]) bfsIter(yield func(TraversalEvent[V]) bool, seen map[V]uint8, vertex V) bool {
 	if seen[vertex] != WHITE {
 		return true
 	}

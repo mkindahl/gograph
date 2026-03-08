@@ -24,7 +24,7 @@ type dfsFrame[V comparable] struct {
 
 // DepthFirst returns an iterator that yields TraversalEvent values
 // for a depth-first traversal of the entire graph.
-func (graph *Graph[V]) DepthFirst() iter.Seq[TraversalEvent[V]] {
+func (graph *Digraph[V]) DepthFirst() iter.Seq[TraversalEvent[V]] {
 	return func(yield func(TraversalEvent[V]) bool) {
 		info := make(map[V]uint8)
 		var stack []dfsFrame[V]

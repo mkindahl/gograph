@@ -12,9 +12,12 @@ import (
 	"iter"
 )
 
-// Graph is the respresentation of a directed graph. It contain all
+// Edge represents a directed edge as a pair [source, target].
+type Edge[V comparable] [2]V
+
+// Digraph is the respresentation of a directed graph. It contain all
 // the edges and vertices of the graph.
-type Graph[V comparable] struct {
+type Digraph[V comparable] struct {
 	edges       map[V]*list.List
 	edgeCount   int
 	vertexCount int
@@ -38,15 +41,15 @@ func find[V comparable](lst *list.List, value V) (bool, *list.Element) {
 }
 
 // New will create a new, empty, directed graph.
-func New[V comparable]() *Graph[V] {
-	return &Graph[V]{edges: make(map[V]*list.List)}
+func New[V comparable]() *Digraph[V] {
+	return &Digraph[V]{edges: make(map[V]*list.List)}
 }
 
 // AddEdge add an edge to the graph. The source and target vertices
 // will be added to the graph if they are not already present. The
 // function return 'true' if the edge was successfully added, and
 // 'false' if the edge already existed.
-func (graph *Graph[V]) AddEdge(source, target V) bool {
+func (graph *Digraph[V]) AddEdge(source, target V) bool {
 	graph.AddVertex(source)
 	graph.AddVertex(target)
 	lst := graph.edges[source]
@@ -66,7 +69,7 @@ func (graph *Graph[V]) AddEdge(source, target V) bool {
 // serve as endpoints for the edge will not be removed.  The method
 // returns 'true' if the edge was successfully removed, 'false'
 // otherwise.
-func (graph *Graph[V]) RemoveEdge(source, target V) bool {
+func (graph *Digraph[V]) RemoveEdge(source, target V) bool {
 	lst := graph.edges[source]
 	if found, elem := find(lst, target); found {
 		lst.Remove(elem)
@@ -79,7 +82,7 @@ func (graph *Graph[V]) RemoveEdge(source, target V) bool {
 // AddVertex will add a vertex to the graph. The vertex will have no
 // in- or out-edges.  The function return 'true' if the vertex was
 // successfully added, and 'false' if the vertex already existed.
-func (graph *Graph[V]) AddVertex(vertex V) bool {
+func (graph *Digraph[V]) AddVertex(vertex V) bool {
 	if graph.edges[vertex] == nil {
 		graph.edges[vertex] = list.New()
 		graph.vertexCount++
@@ -91,7 +94,7 @@ func (graph *Graph[V]) AddVertex(vertex V) bool {
 // RemoveVertex will remove the vertex from the graph. Any edges
 // connecting to the graph (either in- or out-edges) will also be
 // removed.
-func (graph *Graph[V]) RemoveVertex(vertex V) bool {
+func (graph *Digraph[V]) RemoveVertex(vertex V) bool {
 	// It is guaranteed that the vertex is present in the map if
 	// it is present in the graph.
 	if graph.edges[vertex] != nil {
@@ -116,13 +119,13 @@ func (graph *Graph[V]) RemoveVertex(vertex V) bool {
 
 // HasVertex check if a vertex exists in the graph. Will return 'true'
 // if the vertex exists and 'false' otherwise.
-func (graph *Graph[V]) HasVertex(vertex V) bool {
+func (graph *Digraph[V]) HasVertex(vertex V) bool {
 	return graph.edges[vertex] != nil
 }
 
-// HasEdge check if an edge exists in the graph. Will return 'true' if
+// Adjacent check if an edge exists in the graph. Will return 'true' if
 // the edge exists, and 'false' otherwise.
-func (graph *Graph[V]) HasEdge(source, target V) bool {
+func (graph *Digraph[V]) Adjacent(source, target V) bool {
 	if lst := graph.edges[source]; lst != nil {
 		found, _ := find(lst, target)
 		return found
@@ -132,18 +135,18 @@ func (graph *Graph[V]) HasEdge(source, target V) bool {
 
 // Order will return the order of the graph, that is, the number of vertices
 // in the graph.
-func (graph *Graph[V]) Order() int {
+func (graph *Digraph[V]) Order() int {
 	return graph.vertexCount
 }
 
 // Size will return size of the graph, that is the number of edges in
 // the graph.
-func (graph *Graph[V]) Size() int {
+func (graph *Digraph[V]) Size() int {
 	return graph.edgeCount
 }
 
 // Vertices returns an iterator over all vertices in the graph.
-func (graph *Graph[V]) Vertices() iter.Seq[V] {
+func (graph *Digraph[V]) Vertices() iter.Seq[V] {
 	return func(yield func(V) bool) {
 		for vertex := range graph.edges {
 			if !yield(vertex) {
@@ -155,7 +158,7 @@ func (graph *Graph[V]) Vertices() iter.Seq[V] {
 
 // Edges returns an iterator over all edges in the graph as
 // (source, target) pairs.
-func (graph *Graph[V]) Edges() iter.Seq2[V, V] {
+func (graph *Digraph[V]) Edges() iter.Seq2[V, V] {
 	return func(yield func(V, V) bool) {
 		for vertex, edges := range graph.edges {
 			for elem := edges.Front(); elem != nil; elem = elem.Next() {
@@ -169,7 +172,7 @@ func (graph *Graph[V]) Edges() iter.Seq2[V, V] {
 
 // OutEdges returns an iterator over the out-edges of a vertex as
 // (source, target) pairs.
-func (graph *Graph[V]) OutEdges(vertex V) iter.Seq2[V, V] {
+func (graph *Digraph[V]) OutEdges(vertex V) iter.Seq2[V, V] {
 	return func(yield func(V, V) bool) {
 		lst := graph.edges[vertex]
 		if lst == nil {

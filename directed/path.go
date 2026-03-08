@@ -10,7 +10,7 @@ import "errors"
 // ShortestPath finds the shortest path between two vertices, returning
 // a slice of vertices from start to stop. Returns an error if no path
 // exists.
-func (graph *Graph[V]) ShortestPath(start, stop V) ([]V, error) {
+func (graph *Digraph[V]) ShortestPath(start, stop V) ([]V, error) {
 	childOf := make(map[V]V)
 
 	for event := range graph.BreadthFirstFrom(start) {

@@ -70,8 +70,8 @@ func TestAddEdge(t *testing.T) {
 		}
 	}
 
-	checkedHasEdge := func(x, y int, expected bool, format string) {
-		if graph.HasEdge(x, y) != expected {
+	checkedAdjacent := func(x, y int, expected bool, format string) {
+		if graph.Adjacent(x, y) != expected {
 			t.Errorf(format, x, y)
 		}
 	}
@@ -96,9 +96,9 @@ func TestAddEdge(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		for j := 10; j < 20; j++ {
-			checkedHasEdge(i, j, true, "Edge (%v,%v) missing")
-			checkedHasEdge(i+10, j, false, "Edge (%v,%v) extreneous")
-			checkedHasEdge(i, j+10, false, "Edge (%v,%v) extreneous")
+			checkedAdjacent(i, j, true, "Edge (%v,%v) missing")
+			checkedAdjacent(i+10, j, false, "Edge (%v,%v) extreneous")
+			checkedAdjacent(i, j+10, false, "Edge (%v,%v) extreneous")
 		}
 	}
 
@@ -120,15 +120,15 @@ func TestAddEdge(t *testing.T) {
 func TestRemoveEdge(t *testing.T) {
 	graph := New[int]()
 
-	checkedHasEdge := func(x, y int, expected bool, format string) {
-		if graph.HasEdge(x, y) != expected {
+	checkedAdjacent := func(x, y int, expected bool, format string) {
+		if graph.Adjacent(x, y) != expected {
 			t.Errorf(format, x, y)
 		}
 	}
 
 	checkedRemoveEdge := func(source, target int) {
 		graph.RemoveEdge(source, target)
-		checkedHasEdge(source, target, false, "Edge (%d,%d) should not be there")
+		checkedAdjacent(source, target, false, "Edge (%d,%d) should not be there")
 	}
 
 	graph.AddEdge(1, 2)
@@ -138,10 +138,10 @@ func TestRemoveEdge(t *testing.T) {
 	graph.AddEdge(4, 1)
 
 	checkedRemoveEdge(4, 1)
-	checkedHasEdge(1, 2, true, "Edge (%d, %d) missing")
-	checkedHasEdge(1, 3, true, "Edge (%d, %d) missing")
-	checkedHasEdge(3, 4, true, "Edge (%d, %d) missing")
-	checkedHasEdge(2, 4, true, "Edge (%d, %d) missing")
+	checkedAdjacent(1, 2, true, "Edge (%d, %d) missing")
+	checkedAdjacent(1, 3, true, "Edge (%d, %d) missing")
+	checkedAdjacent(3, 4, true, "Edge (%d, %d) missing")
+	checkedAdjacent(2, 4, true, "Edge (%d, %d) missing")
 }
 
 func TestRemoveVertex(t *testing.T) {
@@ -153,8 +153,8 @@ func TestRemoveVertex(t *testing.T) {
 		}
 	}
 
-	checkedHasEdge := func(x, y int, expected bool, format string) {
-		if graph.HasEdge(x, y) != expected {
+	checkedAdjacent := func(x, y int, expected bool, format string) {
+		if graph.Adjacent(x, y) != expected {
 			t.Errorf(format, x, y)
 		}
 	}
@@ -171,14 +171,14 @@ func TestRemoveVertex(t *testing.T) {
 	graph.AddEdge(4, 1)
 
 	checkedRemoveVertex(4)
-	checkedHasEdge(1, 2, true, "Edge (%d, %d) missing")
-	checkedHasEdge(1, 3, true, "Edge (%d, %d) missing")
-	checkedHasEdge(3, 4, false, "Edge (%d, %d) present")
-	checkedHasEdge(2, 4, false, "Edge (%d, %d) present")
-	checkedHasEdge(4, 1, false, "Edge (%d, %d) present")
+	checkedAdjacent(1, 2, true, "Edge (%d, %d) missing")
+	checkedAdjacent(1, 3, true, "Edge (%d, %d) missing")
+	checkedAdjacent(3, 4, false, "Edge (%d, %d) present")
+	checkedAdjacent(2, 4, false, "Edge (%d, %d) present")
+	checkedAdjacent(4, 1, false, "Edge (%d, %d) present")
 }
 
-func checkGraphCount(t *testing.T, graph *Graph[int], vertices_expected, edges_expected int) {
+func checkGraphCount(t *testing.T, graph *Digraph[int], vertices_expected, edges_expected int) {
 	vertices := graph.Order()
 	if vertices_expected != vertices {
 		t.Errorf("Wrong number of vertices (was %d, expected %d)", vertices, vertices_expected)

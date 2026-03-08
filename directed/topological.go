@@ -9,7 +9,7 @@ import "iter"
 
 // Topological returns an iterator over the vertices of the graph in
 // topological order.
-func (graph *Graph[V]) Topological() iter.Seq[V] {
+func (graph *Digraph[V]) Topological() iter.Seq[V] {
 	return func(yield func(V) bool) {
 		var order []V
 		for event := range graph.DepthFirst() {

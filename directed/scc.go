@@ -24,8 +24,8 @@ type sccInfo struct {
 // The intention is normally to use the algorithm to find cycles in
 // the graph, and this behaviour defeats the purpose, so we only
 // consider SCCs of size larger than 1.
-func (graph *Graph[V]) Cycles() iter.Seq[*Graph[V]] {
-	return func(yield func(*Graph[V]) bool) {
+func (graph *Digraph[V]) Cycles() iter.Seq[*Digraph[V]] {
+	return func(yield func(*Digraph[V]) bool) {
 		info := make(map[V]*sccInfo)
 		var stack []V
 		time := 0
