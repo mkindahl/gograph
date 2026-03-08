@@ -184,7 +184,7 @@ func TestBreadthFirstWalk(t *testing.T) {
 	info := make(map[string]int)
 	fin := 0
 
-	for event := range graph.BreadthFirst() {
+	for event := range graph.BreadthFirstTraversal() {
 		if event.Kind == Finish {
 			info[event.Vertex] = fin
 			fin++
@@ -198,7 +198,7 @@ func TestBreadthFirstWalk(t *testing.T) {
 	}
 }
 
-func TestBreadthFirstIterator(t *testing.T) {
+func TestBreadthFirstTraversalIterator(t *testing.T) {
 	graph := New[string]()
 	graph.AddEdges(
 		Edge[string]{"a", "b"},
@@ -209,7 +209,7 @@ func TestBreadthFirstIterator(t *testing.T) {
 
 	discovered := make(map[string]bool)
 	finished := make(map[string]bool)
-	for event := range graph.BreadthFirst() {
+	for event := range graph.BreadthFirstTraversal() {
 		switch event.Kind {
 		case Discover:
 			discovered[event.Vertex] = true

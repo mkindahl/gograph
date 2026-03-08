@@ -30,7 +30,7 @@ func (graph *Digraph[V]) Cycles() iter.Seq[*Digraph[V]] {
 		var stack []V
 		time := 0
 
-		for event := range graph.DepthFirst() {
+		for event := range graph.DepthFirstTraversal() {
 			switch event.Kind {
 			case Discover:
 				time++

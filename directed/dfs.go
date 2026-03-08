@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	WHITE = iota // Undiscovered
-	GREY         // Discovered, but not finalized
-	BLACK        // Finalized
+	white = iota // Undiscovered
+	grey         // Discovered, but not finalized
+	black        // Finalized
 )
 
 // dfsFrame represents a single stack frame for the iterative DFS.
@@ -24,13 +24,16 @@ type dfsFrame[V comparable] struct {
 
 // DepthFirst returns an iterator that yields TraversalEvent values
 // for a depth-first traversal of the entire graph.
-func (graph *Digraph[V]) DepthFirst() iter.Seq[TraversalEvent[V]] {
+// DepthFirstTraversal returns an iterator that yields TraversalEvent values
+// for a full depth-first traversal of the entire graph, including
+// Discover, Finish, BackEdge, and CrossEdge events.
+func (graph *Digraph[V]) DepthFirstTraversal() iter.Seq[TraversalEvent[V]] {
 	return func(yield func(TraversalEvent[V]) bool) {
 		info := make(map[V]uint8)
 		var stack []dfsFrame[V]
 
 		for vertex := range graph.edges {
-			if info[vertex] != WHITE {
+			if info[vertex] != white {
 				continue
 			}
 
@@ -43,8 +46,8 @@ func (graph *Digraph[V]) DepthFirst() iter.Seq[TraversalEvent[V]] {
 			for len(stack) > 0 {
 				frame := &stack[len(stack)-1]
 
-				if info[frame.vertex] == WHITE {
-					info[frame.vertex] = GREY
+				if info[frame.vertex] == white {
+					info[frame.vertex] = grey
 					if !yield(TraversalEvent[V]{Kind: Discover, Parent: frame.parent, Vertex: frame.vertex}) {
 						return
 					}
@@ -60,17 +63,17 @@ func (graph *Digraph[V]) DepthFirst() iter.Seq[TraversalEvent[V]] {
 					frame.nextChild = frame.nextChild.Next()
 
 					switch info[child] {
-					case WHITE:
+					case white:
 						stack = append(stack, dfsFrame[V]{
 							parent: frame.vertex,
 							vertex: child,
 						})
 						advanced = true
-					case GREY:
+					case grey:
 						if !yield(TraversalEvent[V]{Kind: BackEdge, Parent: frame.vertex, Vertex: child}) {
 							return
 						}
-					case BLACK:
+					case black:
 						if !yield(TraversalEvent[V]{Kind: CrossEdge, Parent: frame.vertex, Vertex: child}) {
 							return
 						}
@@ -81,7 +84,7 @@ func (graph *Digraph[V]) DepthFirst() iter.Seq[TraversalEvent[V]] {
 				}
 
 				if !advanced {
-					info[frame.vertex] = BLACK
+					info[frame.vertex] = black
 					if !yield(TraversalEvent[V]{Kind: Finish, Parent: frame.parent, Vertex: frame.vertex}) {
 						return
 					}

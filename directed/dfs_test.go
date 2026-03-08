@@ -57,7 +57,7 @@ func TestDepthFirstWalk(t *testing.T) {
 
 	info := make(map[int]*Info)
 	time := 1
-	for event := range graph.DepthFirst() {
+	for event := range graph.DepthFirstTraversal() {
 		switch event.Kind {
 		case Discover:
 			if info[event.Vertex] == nil {
@@ -88,7 +88,7 @@ func TestCircularGraph(t *testing.T) {
 	graph := New[int]()
 	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 1})
 	visited := make(map[int]int)
-	for event := range graph.DepthFirst() {
+	for event := range graph.DepthFirstTraversal() {
 		if event.Kind == Discover {
 			if visited[event.Vertex] == 0 {
 				visited[event.Vertex] = 1
@@ -99,13 +99,13 @@ func TestCircularGraph(t *testing.T) {
 	}
 }
 
-func TestDepthFirstIterator(t *testing.T) {
+func TestDepthFirstTraversalIterator(t *testing.T) {
 	graph := New[int]()
 	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3})
 
 	discovered := make(map[int]bool)
 	finished := make(map[int]bool)
-	for event := range graph.DepthFirst() {
+	for event := range graph.DepthFirstTraversal() {
 		switch event.Kind {
 		case Discover:
 			discovered[event.Vertex] = true
@@ -123,12 +123,12 @@ func TestDepthFirstIterator(t *testing.T) {
 	}
 }
 
-func TestDepthFirstIteratorBackEdge(t *testing.T) {
+func TestDepthFirstTraversalIteratorBackEdge(t *testing.T) {
 	graph := New[int]()
 	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 1})
 
 	hasBackEdge := false
-	for event := range graph.DepthFirst() {
+	for event := range graph.DepthFirstTraversal() {
 		if event.Kind == BackEdge {
 			hasBackEdge = true
 		}
@@ -138,11 +138,11 @@ func TestDepthFirstIteratorBackEdge(t *testing.T) {
 	}
 }
 
-func TestDepthFirstIteratorBreak(t *testing.T) {
+func TestDepthFirstTraversalIteratorBreak(t *testing.T) {
 	graph := New[int]()
 	graph.AddEdges(Edge[int]{1, 2}, Edge[int]{2, 3}, Edge[int]{3, 4})
 	count := 0
-	for range graph.DepthFirst() {
+	for range graph.DepthFirstTraversal() {
 		count++
 		if count >= 3 {
 			break

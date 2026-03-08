@@ -12,7 +12,7 @@ import "iter"
 func (graph *Digraph[V]) Topological() iter.Seq[V] {
 	return func(yield func(V) bool) {
 		var order []V
-		for event := range graph.DepthFirst() {
+		for event := range graph.DepthFirstTraversal() {
 			if event.Kind == Finish {
 				order = append(order, event.Vertex)
 			}

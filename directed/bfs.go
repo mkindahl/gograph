@@ -22,13 +22,13 @@ func (graph *Digraph[V]) BreadthFirstFrom(vertex V) iter.Seq[TraversalEvent[V]] 
 	}
 }
 
-// BreadthFirst returns an iterator that yields TraversalEvent values
+// BreadthFirstTraversal returns an iterator that yields TraversalEvent values
 // for a breadth-first traversal of the entire graph.
-func (graph *Digraph[V]) BreadthFirst() iter.Seq[TraversalEvent[V]] {
+func (graph *Digraph[V]) BreadthFirstTraversal() iter.Seq[TraversalEvent[V]] {
 	return func(yield func(TraversalEvent[V]) bool) {
 		seen := make(map[V]uint8)
 		for vertex := range graph.edges {
-			if seen[vertex] != WHITE {
+			if seen[vertex] != white {
 				continue
 			}
 			if !graph.bfsIter(yield, seen, vertex) {
@@ -41,12 +41,12 @@ func (graph *Digraph[V]) BreadthFirst() iter.Seq[TraversalEvent[V]] {
 // bfsIter performs a BFS from a single vertex, yielding events via
 // yield. Returns false if yield requested stop.
 func (graph *Digraph[V]) bfsIter(yield func(TraversalEvent[V]) bool, seen map[V]uint8, vertex V) bool {
-	if seen[vertex] != WHITE {
+	if seen[vertex] != white {
 		return true
 	}
 
 	var zero V
-	seen[vertex] = GREY
+	seen[vertex] = grey
 	if !yield(TraversalEvent[V]{Kind: Discover, Parent: zero, Vertex: vertex}) {
 		return false
 	}
@@ -58,8 +58,8 @@ func (graph *Digraph[V]) bfsIter(yield func(TraversalEvent[V]) bool, seen map[V]
 		queue = queue[1:]
 
 		for _, child := range graph.OutEdges(entry.vertex) {
-			if seen[child] == WHITE {
-				seen[child] = GREY
+			if seen[child] == white {
+				seen[child] = grey
 				if !yield(TraversalEvent[V]{Kind: Discover, Parent: entry.vertex, Vertex: child}) {
 					return false
 				}
@@ -67,7 +67,7 @@ func (graph *Digraph[V]) bfsIter(yield func(TraversalEvent[V]) bool, seen map[V]
 			}
 		}
 
-		seen[entry.vertex] = BLACK
+		seen[entry.vertex] = black
 		if !yield(TraversalEvent[V]{Kind: Finish, Parent: entry.parent, Vertex: entry.vertex}) {
 			return false
 		}
